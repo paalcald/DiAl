@@ -1,0 +1,78 @@
+#+Title: Semana 2
+#+STARTUP: latexpreview
+* Calculo
+  - Para instrucciones condicionales, tomo siempre el maximo.
+  - Para calcular el coste de una instruccion iterativa utilizamos la regla del producto, coste total de cada iteracion por numero total de instrucciones. *ojo* en caso de que sean diferentes nos toca hacer un sumatorio!!
+    
+* Algoritmos Iterativos
+  #+begin_src pseudo
+fun producto (A[1..n][1..n], B[1..n][1..n] de ent) { O(n^3) }
+    dev C[1..n][1..n] de ent
+    var i, j, k: nat, s:ent
+    para i = 1 hasta n hacer { O(n * n^2) = O(n^3) }
+        para j = 1 hasta n hacer { O(n * n) = O(n^2) }
+            s := 0; O(1)
+            para k = 1 hasta n hacer  { O(n) }
+                s := s + A[i,j] * B[k,j]  { O(1) }
+                k := k + 1 { O(1)}
+            fpara
+        fpara
+    fpara
+ffun
+  #+end_src
+** Ejemplo de ordenacion por insercion
+   
+  \Theta((n - (i + 1) + 1) = \Theta(n - i)
+  
+  \( \sum_{i = 1}^{n - 1} (n - i) = \sum_{i = 1}^{n - 1} n - \sum_{i = 1}^{n - 1} i = n(n - 1) - \frac{n(n - 1) n}{2} = \Theta(n^2) \)
+
+#+begin_src pseudo
+  fun busqueda-sec?(V[1..n] de ent, x: ent) dev i: nat 
+      i := 1;
+      mientras i <= n &&c V[i] != x hacer
+	       i := i + 1
+      fmientras
+  ffun
+#+end_src
+** Analisis en media
+   Asumamos que x esta con probabilidad p, 0 <= p <= 1
+   La probabilidad de que este en la posicion i es $\frac{p}{n}$.
+   Una clase mas, n +1 \forall{}i: 1 <= i <= n: V[i] != x. Se realizan n comparaciones.
+   
+** Ejercicio Muy Recomendado
+   El 3.21
+   #+begin_src pseudo
+     fun potencia1(x: ent, y: nat) dev p:ent
+     var z : nat
+	 z := y ; p := 1;
+	 mientras z > 0 hacer
+		  p
+
+     fun potencia2(x:ent, y:ent) dev p: ent
+	 var w: ent, z: nat
+	 w := x; z := y; p := 1;
+	 mientras z > 0 hacer
+		  si impar(z) entonces p := p * w fsi;
+		  z := z div 2;
+		  w := w * w
+	 fmientras
+     ffun
+   #+end_src
+
+** Algoritmos Recursivos
+
+   \(T(n) = \left\{\begin{align*} T(n) = 4 \text{ si } n = 1\\ 2 T(n/2) + 3n + 2 \text{ si } n \leq 2 \end{align*}\)
+
+*** Busqueda Binaria
+   #+begin_src pseudo
+     fun busqueda-binaria(V[1..n] de ent, e: ent, c, f : nat) dev <b:bool, p:nat
+	 si c > f entonces
+	    <b, p >:= <falso,c>
+	 si no
+	    m := (c + f) div 2;
+	    casos
+		  e < V[m] -> <b, p> := busqueda-binaria(V,e,c,m
+		  e = V[m] -> <b, p> = <cierto, c>
+   #+end_src
+   
+

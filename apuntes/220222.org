@@ -1,0 +1,27 @@
+#+TITLE: Inmersiones por razones de eficiencia
+* Convertir a inmersion
+#+begin_src pseudo
+{P: n >= 0}
+fun raiz_ent(n: ent) dev r: ent {\Theta(log n)}
+ffun
+{Q : r * r <= n <= (r + 1) * (r + 1)}
+#+end_src
+
+Buscamos una constante para convertir en variable e utilizar para la induccion.
+
+#+begin_src pseudo
+{P': n >= 0 && a >= 1}
+fun graiz_ent(n: ent, a: ent) dev r: ent {\Theta(log(n / (a * a))}
+casos
+	n < a * a ==> r := 0
+	n >= a * a ==> r := graiz_ent(n, 2*a);
+	               casos
+		         n <= (r' + a) * (r' + a) ==> r := r'
+			 n >= (r' + a) * (r' + a) ==> r := r' + a
+		       fcasos
+fcasos
+ffun
+{Q': r * r <= n < (r + a) * (r + a)}
+#+end_src
+
+Tengo qeu escoger un tamaño de datos adecuado. En este caso tomaremos m = n div (a * a)

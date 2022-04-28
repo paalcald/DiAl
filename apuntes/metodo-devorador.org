@@ -1,0 +1,14 @@
+* Ejercicio 12.5
+Dados n objetos con pesos P_1, P_2, ..., P_n > 0 y valores respectivos N_1, N_2, ..., N_n > 0 y una mochila con capacidad para soportar un peso maximo M > 0, se quiere elegir un subconjunto de los objetos cuya suma de pesos no exceda M (suponemos \sum P_i > M), y cuya suma de valores sea máxima (debemos llenar la mochila por completo \sum x_i p_i = M. Se permite meter en la mochila tantos objetos, completos como cualquier fracción de las mismas.
+#+begin_src rust
+struct Objeto {
+    peso: i32,
+    volumen: i32,
+}
+
+impl PartialEq for Objeto {
+    fn cmp(&self, other: &Self) -> Ordering {
+	(self.peso / self.volumen).cmp(other.peso / other.volumen)
+    }
+}
+#+end_src

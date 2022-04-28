@@ -1,0 +1,39 @@
+* Una cota inferior
+  Es dificil encontrar una cota inferior en los algoritmos, es decir, es dificil saber si el algoritmo que hemos encontrado es el mejor.
+  Se llama complejidad computacional a la rama encargada de encontrarlo.
+* Especificacion de Algoritmos
+  La rama encargada de la comprobacion matematica de algoritmos.
+* Especificar
+  Que hace, que no como lo hace, si no que queden perfectamente claros los metodos a implementar y el uso.
+** Ejemplo
+   #+begin_src pseudo
+     {0 <= n <= 1000}
+     fun es-suma?(V[1..1000] de ent, n: ent) dev b: bool
+     {(b = exists : 1 <= i <= n : V[i] = ( sum j: <= j <= : V[j]))}
+   #+end_src
+* Logica de Predicados
+*** Notacion
+    - X[0..N) vector de 0 a N-1
+  |               | Precondicion                                              | Postcondicion                                               |
+  |---------------+-----------------------------------------------------------+-------------------------------------------------------------|
+  | Usuario       | Tiene que cumplir los prerequisitos                       | Tiene derecho a presumir que se cumplen las postcondiciones |
+  | Implementador | Tiene derecho a presumir que se cumplen los prerequisitos | Tiene que cumplir las postcondiciones                       |
+** Ejemplos de Sintaxis
+   - El vector esta ordenado
+     (\forall{}i : 0 \leq i < N - 1: X[i] < X[i + 1])
+   - Todos los valores de X son distintos
+     \forall{}i, j : 0 \le i < N \land 0 \le j < N \land i \neq j : X[i] \ne X[j]
+     \forall{}i, j : 0 \le i < j < N : X[i] \ne X[j]
+   - Todos los valores de X son iguales
+     \forall{}i, j : 0 \le i < j < N : X[i] = X[j]
+     \forall{}i : 0 \le i < N - 1 : X[i] = X[i + 1]
+   - X es una permutacion de los valores {0, 1, ... n-1}
+     \forall{}n : 0 \le n < N : (\exists{}i : 0 \le i < N : X[i] = n)
+   - Todos los elementos de X son numeros primos
+     \forall{}i : 0 \le i < N : primo(X[i])
+     donde
+     primo(n) \equiv n \ge 2 \land (\forall{}m : 1 \le m \le n ( n mod m = 0 \rarr (m = 1 \lor m = m)))
+** Semantica
+   Tomaremos un estado \sigma tal que por ejemplo \sigma(N) = 3 y \sigma(X) = [1, 2, 2]
+** Fuerza logica de los predicados
+   - Un estado \sigma satisface un predicado P si \ll

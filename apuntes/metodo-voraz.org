@@ -1,0 +1,42 @@
+#+title: El Metodo Voraz
+* Ejercicio 12.17 (Algoritmo de Dijkstra de Caminos Minimos
+...
+En cada paso, vamos a buscar el vertice que tiene la distancia minima desde el inicio al que queremos encontrar.
+...
+Vector Predecesores Vertices P[2..n] := Vector que necesariamente tienes que pasar por para llegar al vertice n+1 esimo
+|--------------------+--------------------------+-------------------------+-----------------------------------+--------------------------------------|
+| Paso del Algoritmo | Vertice Seleccionado (S) | Candidatos Restantes(C) | Vector Distancias Minimas D[2..n] | Vector Predecesores Vertices P[2..n] |
+|--------------------+--------------------------+-------------------------+-----------------------------------+--------------------------------------|
+|     Inicializacion |                        1 | {2, 3, 4, 5, 6}         | [30, +inf, 50, 40, 100]           | [1, 1, 1, 1, 1]                      |
+|                  1 |                        2 | {3, 4, 5 ,6}            | [30, 70, 50, 40, 100]             | [1, 2, 1, 1, 1]                      |
+|                  2 |                        5 | {3, 4, 6}               | [30, 70, 50, 40, 60]              | [1, 2, 1, 1, 5]                      |
+|                  3 |                        4 | {3, 6}                  | [30, 60, 50, 40, 60]              | [1, 4, 1, 1, 5]                      |
+|                  4 |                        3 | {6}                     | [30, 60, 50, 40, 60]              | [1, 4, 1, 1, 5]                      |
+|                  5 |                        6 | {}                      | [30, 60, 50, 40, 60]              | [1, 4, 1, 1, 5]                      |
+|--------------------+--------------------------+-------------------------+-----------------------------------+--------------------------------------|
+** Obteniendo la solucion
+Miramos D y P, del Vertice al que tenemos que alcanzar miramos en P su predecesor, de manera recursiva para obtener la ruta mas corta. El coste minimo ya lo tenemos en D.
+** Programandolo
+*** Como representamos el grafo?
+Usaremos una matriz, e.g. G[1..6][1..6] de /type/
+#+begin_src pseudo
+fun Dijkstra(G[1..n][1..n] de tipo1) dev <D[2..n] de tipo, P[2..n] de ent> {O(r^2)}
+C = [2, 3, ..., n];
+para i = 2 hasta n hacer
+  D[i] := G[1, i];
+  P := 1
+fpara
+repetir n - 2 veces
+  v := vertice en C tal que D[v] sea minimo
+  C := C - [v]
+  para cada w en C hacer
+    si D[v] + G[v, w] < D[
+    ...
+ffun
+#+end_src
+** Correccion
+El algoritmo de Dijkstra halla los caminos mas cortos desde el origen hasta los demas vertices.
+Por indiccion
+a. Si en un vertice i \ne 1 esta en S, D[i] es la longituo del camino mas corto desde el origen a i.
+b. Si un vertice i no esta en S, D[i] es la longitud del camino minimo ...
+
