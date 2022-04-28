@@ -1,0 +1,10 @@
+# Ignorar Todo
+
+# No ignorar las hojas en formato ".org" pero si el resto de archivos
+hojas-de-problemas/*
+!hojas-de-problemas/hoja-*
+hojas-de-problemas/hoja-*/*
+!hojas-de-problemas/hoja-*/*.org
+
+#Ignorar binarios
+hojas-de-problemas/*/target/*

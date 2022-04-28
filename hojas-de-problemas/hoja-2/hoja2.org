@@ -1,0 +1,179 @@
+#+TITLE: Ejercicios de Especificaci\oacute{}n de Algoritmos
+#+AUTHOR: Pablo C. Alcalde
+#+OPTIONS: toc:nil
+* Dada la siquiente declaración de variables con N \ge 1, formalizar cada una de las siguientes a afirmaciones:
+  a) X contiene el cuadrado de un número.
+     
+     $(\exists{}n : n \in ent : (\exists{}i : 0 \le i < N : X[i] = n * n))$
+     
+  b) /r/ es el producto de todos los elementos positivos en X.
+     
+     $r = (\prod{}i : 0 \le i < N \land X[i] \ge 0 : X[i])$
+     
+  c) /m/ es el resultado de sumar los valores en las posiciones pares de X y restar los valores en las posiciones impares.
+     
+     $m = (\sum{}i : 0 \le i < N : (-1)^(i mod 2) * X[i])$
+     
+  d)  /r/ es el número de veces que m aparece en X.
+     
+     $r = (\#i : 0 \le i < N : X[i] = m)$
+     
+* Las variables que intervienene en este ejercicio son todas de tipo entero. En cada apartado estudia si alguno de los dos predicados es más fuerte que el otro. Razona tus respuestas.
+  a) $0 \le x + 1 \land y + 1 \le N$ y $0 \le x \land y \le N \land y \ne N$
+     \begin{align*}
+     0 \le x + 1 \land y + 1 \le N &\equiv -1 \le x \land y < N \\
+     &\equiv (x = -1 \lor 0 \le x) \land y < N \\
+     &\equiv (x = -1 \land y < N) \lor (0 \le x \land y < N) \\
+     &\equiv (x = -1 \land y < N) \lor (0 \le x \land y \le N \land y \ne N) \\
+     &\impliedby 0 \le x \land y \le N \land y \ne N
+     \end{align*}
+
+  b) $x + 2 * (N - y) \ge 0$ y $0 \le x \land y \le N$
+     \begin{align*}
+     x + 2 * (N - y) \ge 0 &\equiv (x + 2 \ge 0 \land N - y \ge 0) \lor (x + 2 \le 0 \land N - y \le 0) \\
+     &\equiv (x + 2 \ge 0 \land N \ge y) \lor (x + 2 \le 0 \land N \le y) \\
+     &\impliedby (x \ge 0 \land N \ge y) \lor (x + 2 \le 0 \land N \le y) \\
+     &\impliedby 0 \le 0 \land y \le N
+     \end{align*}
+
+  c) $2 * x + 2 \le x + y \le 2 * y - 2$ y $x < (x + y) \mathbin{div} 2 < y$
+     \begin{align*}
+     x < (x + y) \mathbin{div} 2 < y &\equiv 2 * x + (x + y) \mathbin{mod} 2 < x + y < 2 * y + (x + y) \mathbin{mod} 2 \\
+                                     &\equiv (x + (x + y) \mathbin{mod} 2 < y) \land (x < y + (x + y) \mathbin{mod} 2) \\
+                                     &\equiv (((x + y) \mathbin{mod} 2 = 0) \land (x < y) \land (x < y)) \lor (((x + y) \mathbin{mod} 2 = 1) \land (x + 1 < y) \land (x < y + 1)) \\
+                                     &\equiv (((x + y) \mathbin{mod} 2 = 0) \land (x < y)) \lor (((x + y) \mathbin{mod} 2 = 1) \land (x + 1 < y)) \\
+                                     &\equiv (((x + y) \mathbin{mod} 2 = 0) \land (x + 1 < y) \lor (((x + y) \mathbin{mod} 2 = 1) \land (x + 1 < y)) \{aritmetica?\} \\
+                                     &\equiv x + 1 < y \\
+				     &\equiv x + 2 \le y \\
+				     &\equiv (x + 2 \le y) \land (x + 2 \le y) \\
+                                     &\equiv (2 * x + 2 \le x + y) \land (x + y \le 2 * y - 2) \\
+                                     &\equiv 2 * x + 2 \le x + y \le 2 * y - 2
+     \end{align*}
+
+  d) $(\exists{}i : i \in ent : x = 6 * i)$ y $(\exists{}i : i \in ent : x = 2 * i)$
+     \begin{align*}
+     (\exists{}i : i \in ent : x = 6 * i) \land (\exists{}i : i \in ent : x = 2 * i) &\equiv (\exists{}i, j : i \in ent \land j \in ent : x = 6 * i \land x = 2 * j) \\
+                                                             &\equiv (\exists{}i, j : i \in ent \land j \in ent : x = 2 * j \land i = 3 * j) \\
+							     &\equiv (\exists{}i, j : i \in ent \land j \in ent : x = 2 * j) \\
+							     &\equiv (\exists{}i : i \in ent : x = 2 * i)
+     \end{align*}
+
+  e) $(\exists{}i : i \in ent : x = 4 * i)$ y $(\exists{}i : i \in ent : x = 6 * i)$
+     
+     En un estado en el que x = 8, el primer predicado se cumple, pero el segundo no, mientras que en un estado en el que x = 6 pasa lo contrario. Concluimos que ningun predicado es más fuerte que el otro.
+
+  f) $(max\ p: 0 \le p \le n + 1 : n + 1 - p)$ y $n + 1 - (min\ p: 0 \le p \le n + 1 : p)$
+     
+     \begin{align*}
+     (max\ p: 0 \le p \le n + 1 : n + 1 - p) &\equiv n + 1 + (max\ p: 0 \le p \le n + 1 : -p) \\
+                                          &\equiv n + 1 - (min\ p: 0 \le p \le n + 1 : p)
+     \end{align*}
+
+* Escribir de forma equivalente las siguientes fórmulas descomponiendo el rango de los cuantificadores separando un extremo
+  a) $(\forall{}i : 0 \le i \lt N : V[i] \ge 0)$
+     \begin{align*}
+     (\forall{}i : 0 \le i \lt N : V[i] \ge 0) & \equiv (\forall{}i : 0 \lt i \lt N : V[i] \ge 0) \land (V[0] \ge 0)
+     \end{align*}
+  b) $(\exists{}i : 0 \lt i \lt N : V[i - 1] \lt V[i])$
+     \begin{align*}
+     (\exists{}i : 0 \lt i \lt N : V[i - 1] \lt V[i]) \equiv (\exists{}i : 1 \le i \lt N : V[i - 1] \lt V[i]) \\
+                                       &\equiv (\exists{}i : 1 \lt i \lt N : V[i - 1] \lt V[i]) \lor (V[0] \lt V[1])
+     \end{align*}
+  c) $(\# k : 0 \le k \lt N : (\forall{}i : 0 \le i \lt k : V[i] \lt V[k]))$
+     \begin{align*}
+     (\# k : 0 \le k \lt N : (\forall{}i : 0 \le i \lt k : V[i] \lt V[k])) &\equiv (\# k : 0 \lt k \lt N : (\forall{}i : 0 \le i \lt k : V[i] \lt V[k])) + (\forall{}i : 0 \le i \lt 0 : V[i] \lt V[0]) \\
+                                                         &\equiv (\# k : 0 \lt k \lt N : (\forall{}i : 0 \le i \lt k : V[i] \lt V[k])) + 1
+     \end{align*}
+  d) $(\# p, q : 0 \le p \lt q \lt N : V[p] = 0 \land V[q] = 1)$
+     \begin{align*}
+     (\# p, q : 0 \le p \lt q \lt N : V[p] = 0 \land V[q] = 1) &\equiv (\# p, q : 0 \le p \lt N \land 0 \lt q \lt N \land p \lt q: V[p] = 0 \land V[q] = 1) \\
+                                                     &\equiv (\# p, q : 0 \lt p \lt N \land 1 \le q \lt N \land p \lt q: V[p] = 0 \land V[q] = 1) +
+                                                        (\# q : 1 \le q \lt N : V[0] = 0 \land V[q] = 1) \\
+                                                     &\equiv (\# p, q : 0 \lt p \lt N \land 1 \lt q \lt N \land p \lt q: V[p] = 0 \land V[q] = 1) +
+                                                        (\# p : 1 \le p \lt N : V[p] = 0 \land V[1] = 1) +
+							(\# q : 1 \le q \lt N : V[0] = 0 \land V[q] = 1) \\
+					             &\equiv (\# p, q : 0 \lt p \lt q \lt N : V[p] = 0 \land V[q] = 1) + 
+                                                        (\# p : 1 \le p \lt N : V[p] = 0 \land V[1] = 1) +
+							(\# q : 1 \le q \lt N : V[0] = 0 \land V[q] = 1) 
+     \end{align*}
+  e) $(max\ p,\ q : 0 \le p \le q \le N \land (\forall{}i : p \le i \lt q : V[i] \ge 0) : q - p)$
+     Sin hacer
+  f) $(\forall{}p, q: 0 \le p \land 0 \le q \land p + q = N - 1 : V[p] \ge V[q])$
+     Sin hacer
+     
+* Las variables que intervienen en lo que sigue se suponen declaradas de tipo entero.. Realiza las sustituciones indicadas y simplifica el resultado.
+  a) $(x^{2} + 2 * x + 1)_{x}^{x + a} \equiv ((x + a)^{2} + 2 * (x + a) + 1) \equiv x^{2} + 2 * x * a + 2 * x + 2 * a + 1$
+  b) $(x^{2} \ge y)_{x,y}^{y + 1, x - 1} \equiv (x^{2} - 2 * x + 1 \ge y + 1) \equiv (x^{2} \ge y + 2 * x)$
+  c) $(x \ge y + 1 \land y \ge z)_{x,y}^{x + 3*z, x - y + 1} \equiv (x + 3*z \ge x - y + 1 + 1 \land x - y + 1 \ge z) \equiv (y + 3*z - 2 \ge 0 \land x - y - z + 1 \ge 0)$
+  d) $(\exists{}: 1 \le k \le n : x^{2} + y^{2} = k^{2})_{x,y,n,k}^{x + 1, y - 2, x + y, k + 1} \equiv (\exists{}k: 1 \le k \le x + y : x^{2 }+ 2 * x + y^{2} - 4 * y + 5 = k^{2})$
+     
+* Simplifica, si es posible, las fórmulas siguientes. Las fórmulas simplificadas deben ser equivalentes a las dadas. Las variables se suponen de tipo entero.
+  a) $(\exists{}x: 0 \le x \le 100 : 2 * x = 6) \equiv \top$
+  b) $(\forall{}i : i \ge a : x \le i) \equiv (a \le x) \{no se que regla he aplicado\}$
+  c) $(\exists{}i : i \ge 0 : (\exists{}j: 0 \le j \lt i : x = 2 * j)) \equiv (\exists{}i : 0 \le i : x = 2 * i) \equiv (x mod 2 = 0) $
+  d) $(max\ p :0 \le p \le n + 1 : n + 1 - p)$
+     \begin{align*}
+     (max\ p: 0 \le p \le n + 1 : n + 1 - p) &\equiv n + 1 + (max\ p: 0 \le p \le n + 1 : -p) \\
+                                          &\equiv n + 1 - (min\ p: 0 \le p \le n + 1 : p) \\
+                                          &\equiv n + 1
+     \end{align*}
+
+* Dado un vector v[1..N], ordenado crecientemente hasta la posición N - 1, especificar un algoritmo que "inserte" el elemento v[N] en el lugar que le corresponda del subvector v[1..N-1] de forma que el vector v[1..N] resultante esté ordenado crecientemente.
+
+  {N \ge 1} \\
+  es-perm(V1[1..N] de ent, V2[1..N]) dev b: bool \\
+  {(\forall{}i: 1 \le i \le N : (\exists{}j: 1 \le j \le N: V1[i] = V2[j]))} 
+  
+  {N \ge 1 \land (\forall{}i : 1 \le i \lt N - 1 : v[i] \le v[i + 1]) \land (\forall{}i : 1 \le i \le N : v[i] = V[i])} \\
+  proc insertar(E/S v[1..N] de ent) \\
+  var e := V[N], \\ 
+      i := N - 1; \\ 
+  mientras v[i] \gt e hacer \\ 
+      v[i + 1] := v[i]; \\ 
+      i := i - 1 \\ 
+  fmientras; \\ 
+  v[i + 1] := e \\ 
+  {(\forall{}i : 1 \le i \le N - 1 : v[i] \le v[i + 1]) \land es-perm(V, v)} \\
+  
+* Especificar una función que , dadas dos matrices $A$ y $B$ de $N \times N$ elementos, devuelva una matriz C con el producto matricial de $A$ y $B$. Repetir la especificación considerando que el resultado se devuelva en la propia matriz A.
+
+  El enunciado no especifica, como se modelizan las matrices de N x N elementos, en caso de ser de tipo A[0..N)[0..N) de ent la solución sería la siguiente.
+
+  {N \ge 0} \\
+  proc multiplicar (A[0..N)[0..N) de ent, B [0..N)[0..N) de ent) dev C[0..N)[0..N) de ent \\
+  {(\forall{}i,j: 0 \le i, j \lt N: C[i][j] = (\sum{}k : 0 \le i \lt N : A[i][k] * B[k][j]))} \\
+
+  {N \ge 0 \land (\forall{}i,j : 0 \le i, j \lt N : A[i][j] = a[i][j])} \\
+  proc multiplicar (E/S A[0..N)[0..N) de ent, E B [0..N)[0..N) de ent) dev C[0..N)[0..N) de ent \\
+  {(\forall{}i,j: 0 \le i, j \lt N: A[i][j] = (\sum{}k : 0 \le i \lt N : a[i][k] * B[k][j]))} \\
+
+  En caso de ser A[0..N * N) de ent sería la siguiente
+  
+  {N \ge 0} \\
+  proc multiplicar (A[0..N * N) de ent, B[0..N * N) de ent) dev C[0..N * N) de ent \\
+  {(\forall{}i: 0 \le i \lt N * N : C[i] = (\sum{}j: 0 \le k \lt N : A[i div N + k] * B[i mod N + k * N]))}
+
+  {N \ge 0 \land (\forall{}i: 0 \le i \lt N * N : A[i] = a[i])} \\
+  proc multiplicar (E/S A[0..N * N) de ent, E B[0..N * N) de ent) \\ 
+  {(\forall{}i: 0 \le i \lt N * N : A[i] = (\sum{}j: 0 \le k \lt N : a[i div N + k] * B[i mod N + k * N]))}
+  
+* En un vector no vacío de enteros $V[0..N)$, el índice $i$ se dice que es un $pico$ si $V[i] es el mayor valor almacenado en el segmento V[0..i]. Especificar una función que calcule la suma de todos los valores almacenados en los picos de $V$.
+
+  {N \ge 0 \land 0 \le i \lt N} \\
+  fun es-pico(V[0..N) de ent, i: nat) dev b: bool \\
+  {b = (\forall{}j : 0 \le j \lt i : V[j] \le V[i]))}
+  
+  {N \ge 0} \\
+  proc suma-picos (V[0..N) de ent) dev s: ent \\
+  {(\sum{}i: 0 \le i \lt N \land es-pico(V, i): V[i])}
+  
+* Especificar una función para calcular, dado un vector no vacío de enteros V[0..N), la máxima sobre segmentos no vacíos de números pares, escribiendo la precondición apropiada para que tenga sentido el cálculo que se pide.
+
+  {N \gt 0} \\ 
+  fun seg_max (V[0..N) de ent) dev s: ent \\ 
+  {s = (max p, q : 0 \le p \lt q \lt N \land (\forall{}i: p \le i \le N : V[i] mod 2 = 0) : (\sum{}i : p \le i \lt q : V[i]))} 
+  
+* Dado un vector posiblemente vac\iacute{}o de N natutales, especificar una funci\oacute{}n que obtenga el número de parejas de elementos del vector cuya suma sea 13.
+  {cierto}\\
+  num-parejas-que-suman-trece(V[0..N) de ent) dev n: ent \\
+  { n = (\#: i, j: 0 \le i \lt j \lt N : V[i] + V[j] = 13)} \\

@@ -1,0 +1,213 @@
+#+TITLE: Ejercicios Propuestos de Derivación de Algoritmos Iterativos
+#+AUTHOR: Pablo C. Alcalde
+* Dado un vector A[0..N] con N \ge 0, derivar una función que determine si A[0..N] es o no capicúa.
+{N \ge 0}
+fun es-capicua(A[0..N] de ent) dev b: bool
+{b = (\forall{} i : 0 \le i \lt N + 1 div 2 : V[i] = V[N - i])}
+** Escogemos I y B
+Q \equiv b = (\forall{} i : 0 \le i \lt (N + 1) div 2 : V[i] = V[N - i])
+  \equiv b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land n = (N + 1) div 2
+
+I \equiv b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land 0 \le n \lt (N + 1) div 2
+B \equiv n \ne N div 2
+** Derivamos instrucciones para {P} A_0 {I}
+n := 0;
+b := cierto;
+pmd(n := 0; b = cierto, b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i])) \iff b = (\forall{} i : 0 \le i \lt 0 : V[i] = V[N - i])) \land 0 \le 0 \lt N + 1 div 2
+                                                                 \iff cierto = cierto \land cierto
+                                                                 \impliedby N \ge 0
+** Trabajamos el bucle
+pmd( n := n + 1, b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land 0 \le n \le (N + 1) div 2)
+\iff b = (\forall{} i : 0 \le i \lt n + 1 : V[i] = V[N - i]) \land 0 \le n + 1 \lt (N + 1) div 2
+\iff b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land V[n] = V[N - n] \land -1 \le n \lt (N + 1) div 2
+
+pmd( b \land V[n] = V[N - n], (b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i])) \land V[n] = V[N - n]) \land -1 \le n \lt (N + 1) div 2 - 1
+\iff   b \land V[n] = V[N - n] = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land V[n] = V[N - n] \land -1 \le n \lt (N + 1) div 2
+\iff   b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land -1 \le n \lt (N + 1) div 2
+\impliedby   b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land -1 \le n \le (N + 1) div 2 \land n \ne (N + 1) div 2
+
+** Comprobamos  que la cota es positiva
+b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land 0 \le n \le (N + 1) div 2 \land n \ne (N + 1) div 2 \implies 0 \le n \lt (N + 1) div 2 \implies (N + 1) div 2 - n \gt 0
+
+** Comprobamos que la cota decrece
+pmd(..., n := n + 1, (N + 1) div 2 - n \lt T) \iff (N + 1) div 2 - n - 1 \lt T \impliedby (N + 1) div 2 - n \equal T
+
+** Calculamos el coste del algoritmo
+Como la instruccion dentro del bucle es de orden \Theta(1) y el bucle se repite N div 2 veces el coste es \Theta(N div 2)
+
+{N \ge 0}
+fun es-capicua(A[0..N] de ent) dev b: bool {\Theta((N + 1) div 2)}
+  var n: ent := 0 ;
+  b := cierto
+  {I : b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land 0 \le n \le (N + 1) div 2}
+  {C : (N + 1) div 2 - n}
+  mientras n \ne (N + 1) div 2 hacer
+    b := b \land V[n] = V[N - n];
+    n := n + 1
+  fmientras
+ffun
+{b = (\forall{} i : 0 \le i \lt (N + 1) div 2 : V[i] = V[N - i])}
+
+** Podriamos optimizarlo 
+
+{N \ge 0}
+fun es-capicua(A[0..N] de ent) dev b: bool {\Theta((N + 1) div 2)}
+  var n: ent := 0 ;
+      m: ent := (N + 1) div 2;
+  b := cierto;
+  {I : b = (\forall{} i : 0 \le i \lt n : V[i] = V[N - i]) \land 0 \le n \le (N + 1) div 2}
+  {C : (N + 1) div 2 - n}
+  mientras n \ne m hacer
+    casos
+
+V[n] = V[N - n] \implies n := n + 1
+      V[n] \ne V[N - n] \implies b := falso; n := m ;
+    fcasos
+  fmientras
+ffun
+{b = (\forall{} i : 0 \le i \lt (N + 1) div 2 : V[i] = V[N - i])}
+
+* Derivar un algoritmo que satisfaga la siguiente especificación
+{N \ge 0}
+fun separacion(A[0..N) de bool) dev r: bool
+{r = (\exists p : 0 \le p \le N : (\forall i : 0 \le i \lt p : A[i]) \land (\forall i : p \le i \lt N : \neg{}A[i]))}
+
+** Separamos Q en I \land \neg{}B
+{N \ge 0}
+fun separacion(A[0..N) de bool) dev r: bool
+{r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land n = N}
+
+I \equiv r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land 0 \le n \le N
+B \equiv n \ne N
+
+antes-cierto(A,p) \impliedby (\forall i : 0 \le i \lt p : A[i])
+ya-falso-hasta(A,p,n) \impliedby (\forall i : p \le i \lt n : \neg{}A[i])
+
+** Vemos que instrucciones necesitamos para que que antes del bucle todo funcione
+\lang{}r, a, n\rang := \lang\top, \top, 0\rang
+
+I[0 / n, \top / r] \equiv \top = (\exists p : 0 \le p \le 0 : antes-cierto(A, p) \land ya-falso-hasta(A, p, 0)) \land 0 \le 0 \le N
+         \equiv \top = antes-cierto(A, 0) \land ya-falso-hasta(A, p, 0) \land 0 \le N
+         \equiv \top = \top \land 0 \le N
+         \impliedby N \ge 0
+
+** Vemos como avanzar conservando el invariante
+a := a \land A[n];
+r := (r \land \neg{}A[n]) \lor a;
+n := n + 1;
+
+pmd(n := n + 1, r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land 0 \le n \le N)
+\iff r = (\exists p : 0 \le p \le n + 1 : antes-cierto(A, p) \land ya-falso-hasta(A, p, n + 1)) \land -1 \le n \lt N
+\iff (r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n + 1))
+    \lor antes-cierto(A, n + 1) \land ya-falso-hasta(A, n + 1, n + 1))
+   \land -1 \le n \lt N
+\iff ((r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n) \land \neg{}A[n] \lor (antes-cierto(A, n) \land A[n]))) \land -1 \le n \lt N
+
+pmd(r := (r \land \neg{}A[n]) \lor a; n := n + 1, r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land a = antes-cierto(A, n) \land 0 \le n \le N)
+\iff ((r \land \neg{}A[n]) \lor a = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n) \land \neg{}A[n] \lor (antes-cierto(A, n) \land A[n]))) \land a = (antes-cierto(A, n) \land A[n]) \land -1 \le n \lt N
+
+pmd(a := a \land A[n]; r := (r \land \neg{}A[n]) \lor a; n := n + 1, r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land a = antes-cierto(A, n) \land 0 \le n \le N)
+\iff ((r \land \neg{}A[n]) \lor (a \land A[n]) = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n) \land \neg{}A[n] \lor (antes-cierto(A, n) \land A[n]))) \land (a \land A[n])= (antes-cierto(A, n) \land A[n]) \land -1 \le n \lt N
+\iff ((r \land \neg{}A[n]) \lor (a \land A[n]) = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n) \land \neg{}A[n] \lor (antes-cierto(A, n) \land A[n]))) \land (a = antes-cierto(A, n)) \land -1 \le n \lt N
+\iff ((r \land \neg{}A[n]) \lor (antes-cierto(A, n) \land A[n]) = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n) \land \neg{}A[n] \lor (antes-cierto(A, n) \land A[n]))) \land (a = antes-cierto(A, n)) \land -1 \le n \lt N
+\iff ((r \land \neg{}A[n]) = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n) \land \neg{}A[n])) \land (a = antes-cierto(A, n)) \land -1 \le n \lt N
+\iff (r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land (a = antes-cierto(A, n)) \land -1 \le n \lt N
+\impliedby r = (\exists p : 0 \le p \le n : antes-cierto(A, p) \land ya-falso-hasta(A, p, n)) \land a = antes-cierto(A, n) \land 0 \le n \le N
+
+** Optimizamos
+{N \ge 0}
+fun separacion(A[0..N) de bool) dev r: bool
+  var n := 0
+      m := N
+  r := cierto
+  a := cierto
+  mientras n \ne m hacer
+    casos
+       A[n] \land  a \implies n := n + 1
+       A[n] \land \neg{}a \implies r := false; n := m
+          \neg{}A[n]  \implies a := false ; n := n + 1
+    fcasos
+  fmientras
+ffun
+{r = (\exists p : 0 \le  p \le N : (\forall i : 0 \le i \lt p : A[i]) \land (\forall i : p \le i \lt N : \neg{}A[i]))}
+
+* Derivar un algoritmo de coste lineal (con respecto a la longitud del vector) que satisfaga la siguiente especificación
+#+begin_src dafny
+{N >= 2}
+fun max-resta(A[0..N) de ent) dev r: ent
+{r = (max p, q : 0 <= p < q < N : A[p] - A[q])}
+#+end_src
+
+** Escogemos I y \neg{}B sustituyendo constante por variable en la postcondicion
+I  \equiv r = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) \land 2 \le n \le N )
+\neg{}B \equiv n = N
+
+** Ajustamos las instrucciones de antes del bucle
+m := A[0]
+r := A[0] - A[1]
+n := 2
+
+pmd(m := A[0]; r := A[0] - A[1]; n := 2, r = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) \land 2 \le n \lt N)
+\iff pmd(m := A[0]; r := A[0] - A[1], r = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) \land m = (max p : 0 \le p \lt n - 1 : A[p]) \land 2 \le n \le N)
+\iff pmd(m := A[0]; r := A[0] - A[1], r = (max p, q : 0 \le p \lt q \lt 2 : A[p] - A[q]) \land m = (max p : 0 \le p \lt 1 : A[p]) \land 2 \le N)
+\iff pmd(m := A[0], A[0] - A[1] = A[0] - A[1] \land m = A[0] \land 2 \le N
+\iff A[0] - A[1] = A[0] - A[1] \land A[0] = A[0] \land 2 \le N
+\impliedby 2 \le N
+
+** Damos un paso y restablecemos las condiciones del Invariante
+m := m max A[n - 1]
+r := r max (m - A[n])
+n := n + 1
+
+pmd(m := m max A[n - 1];r := r max (m - A[n]); n := n + 1, r = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) \land m = (max p : 0 \le p \lt n - 1 : A[p]) \land 2 \le n \le N)
+\iff pmd(m := m max A[n - 1]; r := r max (m - A[n]), r = (max p, q : 0 \le p \lt q \lt n + 1 : A[p] - A[q]) \land m = (max p : 0 \le p \lt n : A[p]) \land 2 \le n + 1 \le N)
+\iff pmd(m := m max A[n - 1], r max (m - A[n]) = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) max ((max p: 0 \le p \lt n : A[p]) - A[n]) \land m = (max p : 0 \le p \lt n : A[p]) \land 2 \le n + 1 \le N)
+\iff r max ((m max A[n - 1]) - A[n]) = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) max (((max p: 0 \le p \lt n - 1 : A[p]) max A[n - 1]) - A[n]) \land m = (max p : 0 \le p \lt n - 1: A[p]) \land 1 \le n \lt N
+\iff r - A[n]) = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) - A[n]) \land m = (max p : 0 \le p \lt n - 1: A[p]) \land 1 \le n \lt N
+\iff r = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) \land m = (max p : 0 \le p \lt n - 1: A[p]) \land 1 \le n \lt N
+\impliedby r = (max p, q : 0 \le p \lt q \lt n : A[p] - A[q]) \land m = (max p : 0 \le p \lt n - 1: A[p]) \land 2 \le n \le N \land n \ne N
+                                                                            
+** Comprobamos que la cota todo bien
+
+** Calculamos el orden
+Es solo un bucle de instrucciones constantes hasta n así que \Theta(n).
+
+** Dafny
+#+begin_src dafny
+fun IntMax(a :int, b: int) int
+{
+	if a <= b then a else b;
+}
+method ArrayMax(A : array?<int>) returns (m : int)
+	requires m != null
+	requires m.Length >= 1
+	ensures m in A
+	ensures forall i :: 0 <= i < A.Length ==> A[i] <= m
+{
+	var n: int := 0;
+	m := A[0];
+	while n < A.Length
+	{
+		m := IntMax(m, A[n]);
+		n := n + 1;
+	}
+}
+#+end_src
+
+* Derivar un algoritmo que satisfaga la siguiente especificación
+#+begin_src dafny
+{N >= 1 && A[0] < B[0] && A[N] >= B[N]}
+fun dos-vectores(A[0..N], B[0..N] de ent) dev r : nat
+{r = (max i : 0 <= i < N && A[i] < B[i] && A[i + 1] >= B[i + 1] : i )}
+#+end_src
+
+De la precondicion obtengo que el indice que buscamos existe así que realizamos una busqueda lineal desde N - 1 decrementando de uno en uno.
+
+Escribimos la postcondicion como r = (max i : i \lt c_sup \land P[i]) con P[i] \impliedby A[i] \lt B[i] \land B[i + 1] \le A[i + 1], c_sup = N
+Y de la precondicion obtenemos (\exists i : i \lt c_sup : P[i])
+Utilizamos un esquemma de búsqueda lineal decrementando de uno en uno.
+
+ 
+
+  
+

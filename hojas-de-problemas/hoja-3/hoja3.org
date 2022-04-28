@@ -1,0 +1,188 @@
+#+TITLE: Verificación de algoritmos iterativos
+#+AUTHOR: Pablo C. Alcalde
+#+OPTIONS: toc:nil
+* Demostrar la corrección de la siguiente especificación suponiendo n, s, x: nat.
+#+begin_src dafny
+{ n >= 1 }
+s := 0;
+x := n;
+{ Inv : 0 <= x <= n && s = (sum i :: x < i <= n :: i * i)}
+{ Cota : x }
+mientras x > 0 hacer
+  s := s + x * x;
+  x := x - 1;
+fmientras
+{ s = ( sum i :: 1 <= i <= n :: i * i)}
+#+end_src
+** A mano
+:PROPERTIES:
+:UNNUMBERED: t
+:END:
+Para trabajar con el siguiente código trabajaremos usando matemática inversa los siguientes puntos.
+- Paso I.1
+  Demostrar que partiendo de un estado que satisfaga P y ejecutando las instrucciones que sean necesarias
+  para llegar al principio del bucle, el invariante se satisface, es decir que {P} s := 0; x := n {I}.
+  Lo que es equivalente a demostrar que P \implies pmd(s := 0; x := n, I) hecho que obviaremos en sucesivas aplicaciones
+  de esta misma regla, así como el despliegue de las sustituciones, que haremos directamente. 
+\begin{align*}
+pmd(s := 0;\; x := n,\, I) &\iff
+pmd(s := 0;\; x := n,\, 0 \le x \le n \land s = (\sum i :: x < i \le n :: i^{2}))) \\
+&\iff (0 \le x \le n \land s = (\sum i :: x < i \le n :: i^{2}))_{x, s}^{n, 0} \\
+&\iff (0 \le n) \impliedby P
+\end{align*}
+- Paso I.2
+  Demostrar que  {I \land \neg{}B} s := s + x * x; x := x - 1 {I}
+\begin{align*}
+pmd( s := s + x * x;\; x := x - 1,\,I) &\iff
+pmd( s := s + x * x;\; x := x - 1,\, 0 \le x \le n \land s = (\sum i :: x < i \le n :: i^{2}))\\
+&\iff 0 < x \le n + 1 \land s + x^{2} = (\sum i :: x \le i \le n :: i^{2}) \\
+&\iff 0 < x \le n + 1 \land s + x^{2} = x^{2} + (\sum i :: x < i \le n :: i^{2}) \\
+&\impliedby 0 \le x \le n \land s = (\sum i :: x < i \le n :: i^{2}) \land x \ne 0
+\end{align*}
+- Paso I.3
+\begin{align*}
+[I \land B \implies Q]
+&\equiv [0 \le x \le n \land s = (\sum i :: x < i \le n :: i * i) \land x = 0 \implies s = (\sum i :: 1 \le i \le n :: i^{2})] \\
+&\equiv [s = ( \sum i :: 0 < i \le n :: i^{2}) \implies s = (\sum i :: 1 \le i \le n :: i^{2})] \\
+&\equiv [true]
+\end{align*}
+- Paso C.1
+\begin{align*}
+\{I \land \neg{}B\} \implies x \ge 0
+&\equiv 0 \le x \le n \land s = (\sum i :: x < i \le n :: i * i) \implies x \ge 0
+\end{align*}
+- Paso C.2
+\begin{align*}
+\{I \land \neg{}B \land x = T\}  s := s + x * x;\; x := x - 1 \{ n \le T \}
+&\equiv wp.(s := s + x * x;\; x := x - 1).(x \le T) \\
+&\equiv x - 1 \le T \impliedby x = T
+\end{align*}
+** Usando Dafny
+   :PROPERTIES:
+   :UNNUMBERED: t
+   :END:
+#+begin_src dafny
+  function suma_cuadrados(n: int) : int
+	  requires n >= 0
+	  decreases n
+  {
+	  if (n == 0) then 0
+	  else n * n + suma_cuadrados(n - 1)
+  }
+  
+  method ejercicio_1(n: int) returns (s: int)
+	  requires n >= 1
+	  ensures s == suma_cuadrados(n)
+  {
+	  s := 0;
+	  var x := n;
+	  while (x > 0)
+		  invariant suma_cuadrados(n) == suma_cuadrados(x) + s
+		  decreases x
+	  {
+		  s := s + x * x;
+		  x := x - 1;
+	  }
+  }  
+#+end_src
+* Verificar el siguiente algoritmo para calcula la raíz cuadrada entera:
+#+begin_src dafny
+{P : n >= 0}
+fun raiz-ent( n: ent) dev r: ent
+  r := 0;
+  {Inv : r >= 0 && r * r <= n}
+  {Cota : n - r * r}
+  mientras n >= (r + 1) * (r + 1) hacer
+    r := r + 1
+  fmientras
+ffun
+{Q : r >= 0 && r * r <= n < (r + 1) * (r + 1)}
+#+end_src
+
+1. pmd(r := 0, I) \equiv {0 \le n} Q.E.D
+
+2. pmd(r := r + 1, I) \iff (r + 1 \ge 0) \land (r + 1) * (r + 1)  \le n)
+   \iff (r + 1 \ge 0) \land (r * r \le n) \land ((r + 1) * (r + 1)  \le n)
+   \impliedby I \land \neg{}B
+
+3. (r \ge 0 \land r * r \le n) \land (n \lt (r + 1) * (r + 1)) \implies (r \ge 0 \land r * r \le n \lt (r + 1) * (r + 1))
+
+4. (r \ge 0 \land r * r \le n) \land (n \ge (r + 1) * (r + 1)) \implies (r \ge 0 \land r * r + 2 * r + 1 \le n)
+   \implies (r \ge 0 \land n - r * r \ge 2 * r + 1)
+   \implies (r \ge 0 \land n - r * r \gt 2 * r)
+   \implies n - r * r \gt 0
+
+5. pmd(r := r + 1, n - r * r \le T) \iff n - (r + 1) * (r + 1) \le T
+   \iff n - r * r + 2 * r + 1 \le T
+   \impliedby n - r * r = T
+* En un vector no vacío V[0..n) de enteros, el índice i se dice que es un $pico$ si $V[i]$ es el mayor valor almacenado en el segmento V[0..i]. Verificar el siguiente algoritmo iterativo que recibe como argumento el vector V[0..N) y calcula la suma de todos los valores almacenados en los picos de V.
+#+begin_src dafny
+{P : N > 0}
+fun suma-picos (V[0..N) de ent) dev s:ent
+  var n: nat, m: ent
+  n := 1; s := V[0]; m := V[0];
+  {Inv : 0 <= n <= N && s = (sum i: 0 <= i < n && es-pico(V, i) : V[i]) && m = (max j : 0 <= j < n : V[j])}
+  {Cota : N - n}
+  mientras n != N hacer
+    si V[n] >= m entonces s := s + V[n] fsi;
+    m := m max V[n];
+    n := n + 1
+  fmientras
+ffun
+{Q : s = (sum i: 0 <= i < N && es-pico(V, i) : V[i])}
+  #+end_src
+** {0 \lt N}n := 1; s:= V[0]; m := V[0] {Inv}
+\begin{align*}
+ pmd(n := 1; s := V[0]; m := V[0], Inv) &\iff 0 \le 1 \le N \land V[0] = (\sum{} i: 0 \le i \lt 1 \land \text{es-pico}(V, i) : V[i]) \land V[0] = (\mathbin{max} j : 0 \le j \lt 1 : V[j]) \\
+                                        &\iff 1 \le N \land V[0] = V[0] \land V[0] = V[0] \\
+                                        &\iff 0 \lt N
+\end{align*}
+** {I \land B} si V[n] \ge m entonces s := s + V[n]; m := m max V[n]; n := n + 1 {I}     
+Comprobamos ambos casos para satisfacer el condicional
+\begin{align*}
+I \land B \land V[n] \ge m &\implies 0 \le n \le N \land s = (\sum i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land m  = (\max j : 0 \le j \lt n : V[j]) \land V[n] \ge m  \land n \ne N \\
+                 &\implies 0 \le n \lt N \land s = (\sum i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land m \max V[n] = (\max j : 0 \le j \lt n : V[j]) \max V[n] \land V[n] \ge m  \\
+                 &\implies 0 \le n \lt N \land s = (\sum i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land V[n] = (\max j : 0 \le j \lt n + 1 : V[j]) \land V[n] \ge m  \\
+                 &\implies 0 \le n \lt N \land s + V[n] = (\sum i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) + V[n] \land \operatorname{es-pico}(V,n) \land V[n] = (\max j : 0 \le j \lt n + 1 : V[j]) \land V[n] \ge m  \\
+                 &\implies 0 \le n \lt N \land s + V[n] = (\sum i: 0 \le i \lt n + 1 \land \operatorname{es-pico}(V, i) : V[i]) \land V[n]  = (\max j : 0 \le j \lt n : V[j]) \land V[n] \ge m \\
+\end{align*}
+
+\begin{align*}
+pmd(&s := s + V[n]; m := m \max V[n]; n := n + 1, I) \\
+    &\iff 0 \le n + 1 \le N \land s + V[n] = (\sum i: 0 \le i \lt n + 1  \land \operatorname{es-pico}(V, i) : V[i]) \land  m \max V[n] = (\max j : 0 \le j \lt n + 1: V[j]) \max V[n] \\
+    &\iff -1 \le n \lt N \land s + V[n] = (\sum i: 0 \le i \le n \land \operatorname{es-pico}(V,i) : V[i]) \land m \max V[n] = (\max j: 0 \le j \le n : V[j]) \max V[n] \\
+    &\iff -1 \le n \lt N \land s + V[n] = (\sum i: 0 \le i \le n \land \operatorname{es-pico}(V,i) : V[i]) \land m \max V[n] = (\max j: 0 \le j \le n : V[j]) \max V[n] \\
+    &\impliedby 0 \le n \lt N \land s + V[n] = (\sum i: 0 \le i \lt n + 1 \land \operatorname{es-pico}(V, i) : V[i]) \land V[n]  = (\max j : 0 \le j \lt n : V[j]) \land V[n] \ge m \\
+    &\impliedby 0 \le n \le N \land s = (\sum{} i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land m  = (\max j : 0 \le j \lt n : V[j]) \land V[n] \ge m  \land n \ne N \land V[n] \ge m \\
+    &\impliedby I \land B \land V[n] \ge m
+\end{align*}
+
+\begin{align*}
+I \land B \land V[n] \lt m &\implies 0 \le n \le N \land s = (\sum{} i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land m  = (\max j : 0 \le j \lt n : V[j]) \land V[n] \lt m  \land n \ne N \\
+                 &\implies 0 \le n \lt N \land s = (\sum{} i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land m \max V[j] = (\max j : 0 \le j \lt n : V[j]) \max V[n] \land V[n] \lt m \\
+                 &\implies 0 \le n \lt N \land s = (\sum{} i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land \neg{}\operatorname{es-pico}(V, n) \land m \max V[j] = (\max j : 0 \le j \lt n + 1 : V[j]) \land V[n] \lt m \\
+                 &\implies 0 \le n \lt N \land s = (\sum{} i: 0 \le i \lt n + 1 \land \operatorname{es-pico}(V, i) : V[i]) \land m \max V[j] = (\max j : 0 \le j \lt n + 1 : V[j]) \land V[n] \lt m \\
+\end{align*}
+\begin{align*}
+pmd( m := m \max V[n]; n := n + 1, I) &\iff 0 \le n + 1 \le N \land s = (\sum i: 0 \le i \lt n + 1 \land \operatorname{es-pico}(V, i) : V[i]) \land m \max V[n] = (\max j : 0 \le j \lt n + 1 : V[j]) \\
+                                      &\iff -1 \le n \lt N \land s = (\sum i: 0 \le i \lt n + 1 \land \operatorname{es-pico}(V, i) : V[i]) \land m \max V[n] = (\max j : 0 \le j \lt n + 1 : V[j]) \\
+                                      &\impliedby 0 \le n \lt N \land s = (\sum i: 0 \le i \lt n + 1 \land \operatorname{es-pico}(V, i) : V[i]) \land m \max V[j] = (\max j : 0 \le j \lt n + 1 : V[j]) \land V[n] \lt m \\
+                                      &\impliedby 0 \le n \le N \land s = (\sum i: 0 \le i \lt n \land \operatorname{es-pico}(V, i) : V[i]) \land m  = (\max j : 0 \le j \lt n : V[j]) \land V[n] \lt m  \land n \ne N \\
+                                      &\impliedby I \land B \land V[n] \lt m 
+\end{align*}
+
+** I \land \neg{}B \implies Q
+Al satisfacer n \equal N en I obtenemos directamente Q
+
+** I \land B \implies N - n \ge 0
+\begin{align*}
+0 \le n \le N \land s = (\sum{} i: 0 \le i \lt 1 \land \text{es-pico}(V, i) : V[i]) \land m \mathbin{max} V[n] = (\mathbin{max} j : 0 \le j \lt 1 : V[j]) \land n \ne N &\iff 0 \le n \lt N \\
+                                                                                                                                     &\implies N - n \gt 0 \\
+                                                                                                                                     &\implies N - n \ge 0 
+\end{align*}
+
+** {I \land B \land T = n} ... ; n := n + 1 {N - n \lt T}
+\begin{align*}
+\operatorname{pmd}( ... ; n := n + 2, N - n \lt T) &\iff N - n - 1 \lt T \\
+                                                 &\impliedby T = n
+\end{align*}

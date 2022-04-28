@@ -1,0 +1,220 @@
+#+AUTHOR: Pablo C. Alcalde
+#+Title: Ejercicios Propuestos de Derivación de Algoritmos Recursivos
+* Dada la siguiente especificación, realizar una /inmersión final/ para obtener un algoritmo recursivo final que resuelva el problema:
+#+begin_src pseudo
+\{N > 0}
+fun contar-aprobados(V[0..N) de {0..10}) dev a: nat
+\{a = (cuenta i : 0 <= i < N : V[i] >= 5)}
+#+end_src
+
+La estrategia a seguir sera sustituir por una variable de entrada una de las constantes de la postcondicion, escogeremos la que nos de un caso base y precondicion sencillos que sean lo mas simple posible de calcular.
+
+#+begin_src pseudo
+\{N > 0}
+fun contar-aprobados(V[0..N) de {0..10}) dev a: nat
+    a := gcontar-aprobados(V,0)
+ffun   
+\{a = (cuenta i : 0 <= i < N : V[i] >= 5)}
+#+end_src
+
+#+begin_src pseudo
+\{N > 0}
+fun gcontar-aprobados(V[0..N) de {0..10}, n: nat, s: nat) dev a: nat
+    casos
+	  n = N - 1 ==> a := si V[n] >= 5 entonces 1 + s sino s
+	caso n < N - 1 ==> a := gcontar-aprobados(V, n + 1, si V[n] >= 5 entonces 1 + s sino s)
+    fcasos
+ffun
+\{a = (cuenta i : n <= i < N : V[i] >= 5) + s}
+#+end_src
+
+Tomando el tamaño como $t = N - 1 - n$ de tal modo que $0 \le t \lt N$
+
+\begin{equation*}
+T(0) = k_{0} \\
+T(t) = T(t - 1) + k_{1} \\
+\end{equation*}
+
+De donde obtenemos la siguiente recurrencia
+
+\begin{equation*}
+\label{ej1rec}
+T(t) = t*k_1 + k_0\\
+\end{equation*}
+
+De la que concluimos que este algoritmo tiene /coste lineal/.
+
+* Ejercicio 2
+** Especificar una funcion que, dado un vector D[0..N] de digitos en el rango 0..9, que representa un numero en base 10 de forma que el digito menos significativo se encuentra en la posicion 0, calcule el numero natural representado en base decimal por ese vector. Por ejemplo, el resultado de aplicar la funcion al vector [1, 4, 7] tiene que ser el numero natural 741
+
+#+begin_src pseudo
+\{N >= 0}
+fun ej2(D[0..N] de ent) dev r: nat
+\{r := (suma i : 0 <= i <= N : D[i] * 10 ^ i)}
+#+end_src
+
+** Derivar un algoritmo recursivo no final para la especificacion del apartado anterior. Pasar a iterativo el algoritmo recursivo lineal no final obtenido.
+
+#+begin_src pseudo
+r := (suma i : n <= i <= N : D[i] * 10 ^ i)
+  := D[n] * 10 ^ n + (suma i : n + 1 <= i <= N : D[i] * 10 ^ i)
+  := D[n] * 10 ^ n + r[n + 1 / n]
+#+end_src
+
+#+begin_src pseudo
+\{N >= 0}
+fun ej2(D[0..N] de ent) dev r: nat
+    gej2(D, 0, 1)
+\{r := (suma i : 0 <= i <= N : D[i] * 10 ^ i)}
+
+\{N >= 0}
+fun ggej2(D[0..N] de ent, n: nat, p: nat) dev r : nat)
+    casos
+        n = N ==> D[n] * 10 ^ n
+	  caso n < N ==> D[n] * 10 ^ n + gej2(D, n + 1)
+	fcasos
+ffun
+\{r := (suma i : n <= i <= N : D[i] * 10 ^ i)}
+#+end_src
+
+Realizamos una inmersion por razones de eficiencia ya que el orden de 10^n es \Theta(n) para hacerlo constante en cada pasada por el bucle.
+
+#+begin_src pseudo
+\{N >= 0}
+fun ej2(D[0..N] de ent) dev r: nat
+    gej2(D, 0, 1)
+\{r := (suma i : 0 <= i <= N : D[i] * 10 ^ i)}
+
+\{N >= 0 && p = 10 ^ n}
+fun ggej2(D[0..N] de ent, n: nat, p: nat) dev r : nat)
+    casos
+        n = N ==> D[n] * p
+	  caso n < N ==> D[n] * p + ggej2(D, n + 1, p * 10)
+	fcasos    
+ffun
+\{r := (suma i : n <= i <= N : D[i] * 10 ^ i)}
+#+end_src
+
+
+Tomando el tamaño como $t = N - n$ de tal modo que $0 \le t \le N$
+
+\begin{equation*}
+T(0) = k_{0} \\
+T(t) = T(t - 1) + k_{1} \\
+\end{equation*}
+
+De donde obtenemos la siguiente recurrencia
+
+\begin{equation*}
+\label{ej2rec}
+T(t) = t*k_1 + k_0\\
+\end{equation*}
+
+De la que concluimos que este algoritmo tiene /coste lineal/.
+
+#+begin_src pseudo
+\{N >= 0}
+fun gej2_it(D[0..N] de {0..9}, n: nat) dev r: nat
+    var s: pila := pila_vacia();
+    var n, p: nat;
+    <n, p> := <0, 1>;
+    mientras n < N hacer
+        s.apilar(D[n] * p)
+        n := n + 1
+	p := p * 10
+    fmientras
+    r := D[n] * p;
+    mientras !s.es_vacia() hacer
+        r := r + s.desapilar()
+    fmientras
+ffun
+\{r := (suma i : 0 <= i <= N : D[i] * 10 ^ i)}
+#+end_src
+
+* Dos cifras decimales (comprendidas entre 0 y 9) son /pareja/ si suman 9. Dado un numero natural /n/, llamaremos /complementario/ de /n/ al numero obtenido a partir de la representacion decimal de /n/ cambiando cada cifra por su pareja. Por ejemplo, el complementario de 146720 es 853279. Diseñar un algoritmo recursivo que, dado un numero natural /n/, calcule su complementario.
+
+Especificamos la funcion de la siguiente manera
+
+#+begin_src pseudo
+\{n >= 0}
+fun complementario(n: nat) dev r: nat
+\{u = (max i : 0 <= i <= MAX_SIG_FIG_NAT : (paratodo j : 0 <= i < j : n div 10 ^ j != 0))
+  && r = (suma i : 0 <= i <= u : pareja(n mod 10 ^ i) * 10 ^ i)}
+#+end_src
+
+Tras sustituir el 0 por una variable /m/ y derivamos la siguiente llamada recursiva.
+
+\begin{align*}
+\{u = (&\mathbin{max}\;i : 0 <= i <= MAX\_SIG\_FIG\_NAT : (\forall j : 0 \le i < j : n \mathbin{div} 10 ^ j \ne 0)) \\
+    &\land r = pareja(n \mathbin{mod} 10 ^ m) * 10 ^ m + (\sum i : m + 1 \le i \le u : pareja(n \mathbin{mod} 10 ^ i) * 10 ^ i)\} \\
+\{u = (&\mathbin{max}\;i : 0 <= i <= MAX\_SIG\_FIG\_NAT : (\forall j : 0 \le i < j : n \mathbin{div} 10 ^ j \ne 0)) \\
+        &\land r = pareja(n \mathbin{mod} 10 ^ m) * 10 ^ m + r[m + 1 / m] \}\\
+\end{align*}
+
+/u/ no hay que tocarlo por que no depende de /m/ en ningun caso.
+
+#+begin_src pseudo
+\{n >= 0}
+fun complementario(n: nat) dev r: nat
+    gcomplementario(n, 0)
+ffun
+\{u = (max i : 0 <= i <= MAX_SIG_FIG_NAT : (paratodo j : 0 <= i < j : n div 10 ^ j != 0))
+  && r = (suma i : 0 <= i <= u : pareja(n mod 10 ^ i) * 10 ^ i)}
+  
+\{n >= 0}
+fun gcomplementario(n: nat) dev r: nat
+    casos
+        n div (10 ^ m) = 0 ==> pareja(n mod 10 ^ m) * 10 ^ m
+      caso n div (10 ^ m) != 0 ==> pareja(n mod 10 ^ m) * 10 ^ m + gcomplementario(n, m + 1)
+    fcasos
+ffun
+\{u = (max i : 0 <= i <= MAX_SIG_FIG_NAT : (paratodo j : 0 <= i < j : n div 10 ^ j != 0))
+  && r = (suma i : m <= i <= u : pareja(n mod 10 ^ i) * 10 ^ i)}
+#+end_src
+
+El caso base /m = u/ se desprende de /n div (10 ^ m) = 0/, mientras que el caso recursivo, sabemos, por /u/ que para todo valor /l/ menor a /m/, se tiene /n div 10 ^ l \ne 0/
+
+#+begin_src pseudo
+\{n >= 0}
+fun complementario(n: nat) dev r: nat
+    ggcomplementario(n, 0, 1)
+ffun
+\{u = (max i : 0 <= i <= MAX_SIG_FIG_NAT : (paratodo j : 0 <= i < j : n div 10 ^ j != 0))
+  && r = (suma i : 0 <= i <= u : pareja(n mod 10 ^ i) * 10 ^ i)}
+  
+\{n >= 0 && p = 10 ^ m}
+fun gcomplementario(n: nat, m: nat, p: nat) dev r: nat
+    casos
+        n div p = 0 ==> pareja(n mod p) * p
+      caso n div p != 0 ==> pareja(n mod p) * p + gcomplementario(n, m + 1, p * 10)
+    fcasos
+ffun
+\{u = (max i : 0 <= i <= MAX_SIG_FIG_NAT : (paratodo j : 0 <= i < j : n div 10 ^ j != 0))
+  && r = (suma i : m <= i <= u : pareja(n mod 10 ^ i) * 10 ^ i)}
+#+end_src
+
+Tomando el tamaño como $t = u$ de tal modo que $0 \le t \lt N$
+
+\begin{equation*}
+T(0) = k_{0} \\
+T(t) = T(t - 1) + k_{1} \\
+\end{equation*}
+
+De donde obtenemos la siguiente recurrencia
+
+\begin{equation*}
+\label{ej3rec}
+T(t) = t*k_1 + k_0\\
+\end{equation*}
+
+De la que concluimos que este algoritmo tiene /coste lineal/ sobre u, pero u depende de n de manera logaritmica (por ser busqueda lineal con paso n \to n div 10 ), asi que este algoritmo es de /coste logaritmico/.
+
+* Dada la especificacion formal de la siguiente funcion:
+
+#+begin_src pseudo
+\{N >= 2}
+fun max-resta(V[0..N) de ent) dev r: ent
+\{r = (max p, q : 0 <= p < q < N : V[p] - V[q])}
+#+end_src
+
+A) Derivar detalladamente un algoritmo recursivo de /coste lineal/ (con respecto a la longitud del vector)
