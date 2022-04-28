@@ -209,6 +209,7 @@ T(t) = t*k_1 + k_0\\
 
 De la que concluimos que este algoritmo tiene /coste lineal/ sobre u, pero u depende de n de manera logaritmica (por ser busqueda lineal con paso n \to n div 10 ), asi que este algoritmo es de /coste logaritmico/.
 
+* TODO Ejercicio 4
 * Dada la especificacion formal de la siguiente funcion:
 
 #+begin_src pseudo
@@ -218,3 +219,27 @@ fun max-resta(V[0..N) de ent) dev r: ent
 #+end_src
 
 A) Derivar detalladamente un algoritmo recursivo de /coste lineal/ (con respecto a la longitud del vector)
+
+\begin{align*}
+  \{r &= (\max p, q: n \le p < q < N : V[p] - V[q]) \\
+      &= \max((\max q : n < q < N : V[n] - V[q]),(\max p, q: n + 1 \le p \lt q \lt N : V[p] - V[q]))  \} \\
+      &= \max(V[n] - (\min q : n + 1 \le q < N : V[q]), r)  \} \\
+\end{align*}
+
+El problema es cuadrar cual sera el caso base y que orden vamos a usar para que no de error ninguno de los bucles, Tomamos el caso base N - 2 y listo. El ultimo s no nos importa, pero tampoco se sale del vector, asi que todo bien.
+
+#+begin_src pseudo
+fun max-resta(V[0..N) de ent) dev r: ent
+    <r, _ > := gmax-resta(V, 0)
+ffun
+
+fun gmax-resta(V[0..N) de ent) dev <r: ent, s: ent>
+    casos
+	  n = N - 2 ==> < r, s > := < V[n] - V[n + 1], V[n + 1] > 
+      caso n < N - 2 ==> < r, s > := gmax-resta(V, n + 1);
+                     < r, s > := < max(r, V[n] - s), min(V[n], s) >
+    fcasos
+ffun
+#+end_src
+
+Tiene /coste lineal/ por tener la misma recurrencia que el [[Ejercicio 2][ejercicio 2]].

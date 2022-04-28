@@ -4,6 +4,7 @@ extern crate num;
 use std::ops::{Rem, Div, Mul, Add, Sub};
 use num_traits::cast::FromPrimitive;
 use num::Num;
+use std::cmp;
 
 pub fn pot_log(a: u32, n: u32) -> u32 {
     ggpot_log(a, n, 1, 1, a)
@@ -109,6 +110,19 @@ where T: PartialEq + PartialEq<u32>
     }
 }
 
+pub fn max_resta(v: &[i32]) -> i32 {
+    gmax_resta(v, 0).0
+}
+
+fn gmax_resta(v: &[i32], n: usize) -> (i32, i32) {
+    if n == v.len() - 2 {
+	(v[n] - v[n + 1], v[n + 1])
+    } else {
+	let (r, s) = gmax_resta(v, n + 1);
+	(cmp::max(r, v[n] - s), cmp::min(v[n], s))
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -166,5 +180,15 @@ mod tests {
     #[test]
     fn complementario_ideomatico_ejemplo() {
 	assert_eq!(853279, gcomplementario_ideomatico(146720,1,0));
+    }
+
+    #[test]
+    fn max_resta_caso_base() {
+	assert_eq!(-1, max_resta(&[2,3]));
+    }
+
+    #[test]
+    fn max_resta_vector_largo() {
+	assert_eq!(2, max_resta(&[2, 0, 1, 3]));
     }
 }
