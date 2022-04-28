@@ -8,5 +8,9 @@ hojas-de-problemas/*
 hojas-de-problemas/hoja-*/*
 !hojas-de-problemas/hoja-*/*.org
 
+#No ignorar examenes de practica en formato ".org"
+examenes-de-practica/*
+!examenes-de-practica/*.org
+
 #Ignorar binarios de las hojas de problemas
 hojas-de-problemas/*/target/*
