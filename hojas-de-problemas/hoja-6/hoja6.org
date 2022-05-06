@@ -1,0 +1,168 @@
+#+Title: Divide y Vencerás
+#+Author: Pablo C. Alcalde Montes de Oca
+* Busqueda Ternaria. Se trata de decidir si existe un elemento x en un vector de enteros de longitud V[1..n] de longitud n. Diseña un algoritmo de tipo *Divide y Vencerás* con la siguiente estrategia:
+
+$\{n \le 1\}$
+#+begin_src pseudo
+fun busqueda_ternaria(V[0..n] de ent, x: ent) dev b: bool
+#+end_src
+$\{b = (\exists i: 1 \le i \le n : V[i] = x)\}$
+
++ En primer lugar, compara el elemento dado /x/ con el elemento que se encuentra en la posicion /n/3/ del vector.
+  
++ Si este es menor que el elemento /x/, entonces lo compara con el elemento que se encuentra en la posición /2n/3/ del vector.
+  
++ Y si no coincide con /x/, busca recursivamente en el correspondiente subvector de tamaño /1/3/ del original.
+
+$\{(\forall i,j : 1 \le i < j \le n : V[i] < V[j])\}$
+#+begin_src pseudo
+fun busqueda_ternaria(V[0..N] de ent, x: ent, c: nat, f: nat) dev b: bool
+    var n : nat = f - c + 1;
+    casos
+        n = 0 ==> b := falso {el redondeo nos puede dejar rangos vacios}
+        n = 1 ==> b := (V[c] = x)
+      caso n > 1 ==>
+            casos
+                V[n / 3] = x ==> b := cierto
+	        caso V[n / 3] < x ==>
+		      casos
+                        V[2 * n / 3] = x ==> b := cierto
+			caso V[2 * n / 3] > x ==> b := busqueda_ternaria(V, x, n / 3 + 1, 2 * n / 3 - 1)
+			caso V[2 * n / 3] < x ==> b := busqueda_ternaria(V, x, 2 * n / 3 + 1, f)
+		      fcasos
+		caso V[n / 3] > x ==> b := busqueda_ternaria(V, x, c, n / 3 - 1)
+	      fcasos
+    fcasos
+ffun
+#+end_src
+$\{b = (\exists i: 1 \le i \le n : V[i] = x)\}$
+
+** ¿Qué complejidad tiene este algoritmo? Compáralo con el de la búsqueda binaria.
+
+\begin{align*}
+  T(n) &= k_{0} \impliedby n = 0 \\
+  T(n) &= k_{1} \impliedby n = 1 \\
+  T(n) &= T(\frac{n}{3}) + k_{2} \impliedby n > 1 \\
+\end{align*}
+
+\begin{align*}
+  T(n) &= T(\frac{n}{3}) + k_{2} \\
+  &= T(\frac{n}{3^{i}}) + i*k_{2} \\
+  &= T(1) + \log_{3}n * k_{2} \\
+  &= \max (k_{0}, k_{1}) + \log_{3}{n} * k_{2}\\
+\end{align*}
+
+\( T(n) \in \Theta(\log_{3}n) \in \Theta(\log n) \)
+
+Concluimos que el algoritmo tiene el mismo coste  que la busqueda binaria, sin embargo, un cálculo más detallado teniendo en cuenta las constantes, nos mostraría el coste de la gran cantidad de comparaciones realizadas siendo muy superior al equivalente de la /busqueda binaria/.
+
+
+* Matriz transpuesta. Dada una matriz cuadrada M, cuya dimensión es potencia de 2, diseña un algoritmo que calcule su transpuesta M^T mediante la técnica de /Divide y Vencerás/.
+
+\begin{align*}
+  M_{2^{n}, 2^{n}}           & =
+  \begin{pmatrix}
+    m_{1,1}                  & \cdots & m_{1, 2^{n-1}}           & m_{1, 2^{n-1} + 1}           & \cdots & m_{1,2^{n}}           \\
+    \vdots                   & \ddots & \vdots                   & \vdots                       & \ddots & \vdots                \\
+    m_{2^{n-1},1}             & \cdots & m_{2^{n-1}, 2^{n-1}}     & m_{2^{n-1}, 2^{n-1} + 1}     & \cdots & m_{2^{n-1},2^{n}}     \\
+    m_{2^{n-1} + 1, 1}           & \cdots & m_{2^{n-1} + 1, 2^{n-1}} & m_{2^{n-1} + 1, 2^{n-1} + 1} & \cdots & m_{2^{n-1} + 1,2^{n}} \\
+    \vdots                   & \ddots & \vdots                       & \vdots                       & \ddots & \vdots                \\
+    m_{2^{n},1}               & \cdots & m_{2^{n}, 2^{n-1}}          & m_{2^{n}, 2^{n-1} + 1}       & \cdots & m_{2^{n},2^{n}}       \\
+  \end{pmatrix}                                                                                                                  \\
+  m_{1}                         & = \begin{pmatrix}
+                                  m_{1,1}                  & \cdots & m_{1, 2^{n-1}}       \\
+                                  \vdots                   & \ddots & \vdots               \\
+                                      m_{2^{n-1},1}             & \cdots & m_{2^{n-1}, 2^{n-1}} \\
+                                    \end{pmatrix} \\
+  m_{2} &= \begin{pmatrix}
+             m_{1, 2^{n-1} + 1}           & \cdots & m_{1,2^{n}}           \\ 
+              \vdots                       & \ddots & \vdots                \\ 
+             m_{2^{n-1}, 2^{n-1} + 1}     & \cdots & m_{2^{n-1},2^{n}}     \\
+           \end{pmatrix} \\
+  m_{3} &= \begin{pmatrix}
+             m_{2^{n-1} + 1, 1}           & \cdots & m_{2^{n-1} + 1, 2^{n-1}} \\
+             \vdots                   & \ddots & \vdots                   \\
+             m_{2^{n},1}               & \cdots & m_{2^{n}, 2^{n-1}}      \\
+           \end{pmatrix}\\
+  m_{4} &= \begin{pmatrix}
+            & m_{2^{n-1} + 1, 2^{n-1} + 1} & \cdots & m_{2^{n-1} + 1,2^{n}} \\
+            & \vdots                       & \ddots & \vdots                \\
+            & m_{2^{n}, 2^{n-1} + 1}       & \cdots & m_{2^{n},2^{n}}       \\
+          \end{pmatrix}\\
+  \end{align*}
+
+Diseñaremos un algoritmo que realice la traspuesta por bloques recursivamente de tal modo que \(  M\prime = \begin{pmatrix}
+               m_{1}\prime & m_{3}\prime \\
+               m_{2}\prime & m_{4}\prime \\
+             \end{pmatrix}\) lo que en el caso base de tamaño /2x2/ \(m = 
+             \begin{pmatrix}
+               m_{1,1} & m_{1,2} \\
+               m_{2,1} & m_{2,2} \\
+             \end{pmatrix}\) lo que nos da simplemente \(m\prime =
+             \begin{pmatrix}
+               m_{1,1} & m_{2,1} \\
+               m_{1,2} & m_{2,2} \\
+             \end{pmatrix}\) que es un intercambio de dos casillas.
+
+Usaremos por lo tanto el siguiente procedimiento auxiliar en nuestro código, aún que realmente lo tomaremos como un procedimiento que modifica M, por esto mismo crearemos una copia de M previamente que podamos modificar.
+
+$\{1 \le o.primero \le N \land 1 \le o.segundo \le N\}$
+$\{1 \le d.primero \le N \land 1 \le d.segundo \le N\}$
+#+begin_src pseudo
+fun intercambiar_elemento(M[1..N][1..N] de real, o: par, d: par)
+     var temporal: real
+     temporal = M[d.primero, d.segundo];
+     M[d.primero, d.segundo] = M[o.primero, o.segundo];
+     M[o.primero, o.segundo] = temporal;
+ffun
+#+end_src
+$\{(\forall i, j: 1 \le i, j \le N \land i \not\in \{o.primero, d.primero\} \land j \not\in \{o.primero, d.primero\} : M[i,j] = N[i,j])\}$
+$\{M.old[o.primero,o.segundo] = M[d.primero, d.segundo]\}$
+$\{M.old[d.primero,d.segundo] = M[o.primero, o.segundo]\}$
+
+Al mismo tiempo necesitaremos un procedimiento que noss
+
+#+begin_src pseudo
+fun intercambiar_bloque(E / S M[1..N][1..N] de real, o: par, d: par, t: par)
+    var temporal: real;
+    var <i,j : nat> = <0, 0>; 
+    mientras i < t.primero hacer
+        mientras j < t.segundo hacer
+	      temporal = M[d.primero + i, d.primero + j];
+	      M[d.primero + i, d.segundo + j] = M[o.primero + i, o.segundo + j];
+            M[o.primero + i, o.segundo + j] = temporal;
+	      j := j + 1
+	  fmientras;
+	  i := i + 1
+    fmientras
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun trasponer_bloque(E / S M[1..N][1..N] de real, i: par, t: nat)
+    casos
+        t = 2 ==> intercambiar_elemento(M, (i.primero, i.segundo + 1),
+				           (i.primero + 1, i.segundo))
+	caso t > 0 ==> intercambiar_bloque(M, (i.primero, i.segundo + t / 2),
+				         (i.primero + t / 2, i.segundo),
+				         (t / 2, t / 2));
+		  trasponer_bloque(M, (i.primero, i.segundo + t / 2),
+		                      (t / 2, t / 2));
+	          trasponer_bloque(M, (i.primero + t / 2, i.segundo),
+		                      (t / 2, t / 2));
+	          trasponer_bloque(M, (i.primero, i.segundo),
+		                      (t / 2, t / 2));
+		  trasponer_bloque(M, (i.primero + t / 2, i.segundo + t / 2),
+		                      (t / 2, t / 2))
+	fcasos
+ffun	          
+#+end_src
+
+#+begin_src pseudo
+fun traspuesta(M[1..N][1..N] de real) dev T[1..N][1..N] de real
+    var T[1..N][1..N] de real = M[1..N][1..N];
+    trasponer_bloque(T, (1, 1), (N, N))
+ffun
+#+end_src
+
+Lo que haría nuestro algoritmo $\Theta(n \log n)$ excepto por que copiamos la matriz, que es $\Theta(n^{2})$ 
