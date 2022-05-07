@@ -165,4 +165,44 @@ fun traspuesta(M[1..N][1..N] de real) dev T[1..N][1..N] de real
 ffun
 #+end_src
 
+\begin{align*}
+  t &= n * n \\
+  T(4) &= k_{0} \\
+  T(t) &= 4T(\frac{t}{4}) + \frac{n}{4}k_1\\
+  &= 4^{i}T(\frac{t}{4^i}) + i \frac{n}{4}k_1 \\
+  &= k_0\log_4 n + k_1n\log_4 n \\
+\end{align*}
+
+
 Lo que haría nuestro algoritmo $\Theta(n \log n)$ excepto por que copiamos la matriz, que es $\Theta(n^{2})$ 
+
+* Cercanos a la mediana. Diseña un algoritmo de coste \Omega(n) y de tipo *Divide y Vencerás* que dado un vector V[1..n] con /n/ números enteros y un entero positivo /k \le n/, determine los /k/ números de V más cercanos a la mediana de V. Por ejemplo, si V = [3, 4, 1, 5, 2] con n = 5 elementos y mediana V[3] = 3, para k = 3, los elementos devueltos por el algoritmo serían [3, 4, 2].
+
+Como sabemos que el cálculo de la mediana puede ser en el caso peor lineal utilizando el procedimiento /seleccion2/ visto en clase para el /n + 1 div 2/-ésimo elemento, partiremos de esto, una vez obtenida la mediana /med/ se nos ocurren dos caminos a seguir, dependiendo de si la memoría está restringida o no.
+- Podriamos generar el vector W por medio de la transformacion M(x) = abs(x - med) sobre /V/ y a continuación de ahí buscar la distancia al elemento k-ésimo /d/ utilizando /seleccion2/.
+  
+- Podriamos volver a utilizar el mismo procedimiento, /seleccion2/ para encontrar el k-ésimo elemento de nuestro vector otra vez, que llamaremos /g/, salvo que en este caso modificaremos /particion/ para que en lugar de trabajar con el elemento /V[i]/ trabaje con el elemento /abs(V[i] - med)/, de esta manera nos ahorramos guardar memoria adicional.
+  
+En cualquiera de los dos casos con nuestro elemento k-ésimo ya solo tenemos que filtrar /V/ para verificar el predicado con P(x) = abs(x - med) \le d o alternativamente con el predicado P(x) = abs(x - med) \le abs(g - med) en caso de haber calculado directamente el elemento en lugar de la distancia, lo que nos daría la lista a devolver.
+
+#+begin_src pseudo
+fun cercanos_mediana(V[1..N] de ent, k: ent) dev G[1..k] de ent
+    var med: ent := seleccion2(V, 0, N - 1, N div 2);{O(n)}
+    var W[1..N] de ent;
+    var i, u: ent = 0;
+    mientras i < N - 1 hacer {0(n)}
+    	  W[i] := si V[i] > med entonces V[i] - med sino med - V[i];
+	  i := i + 1
+    fmientras
+    var d: ent := seleccion2(W, 0, N - 1, k); {0(n)}
+    i := 0;
+    var j: ent := 0;
+    mientras i < n hacer {O(n)}
+        si V[i] - med <= d entonces G[j] := V[i]; j := j + 1 sino nada;
+	  i := i + 1
+    fmientras
+ffun
+#+end_src
+
+En este caso concluimos que el orden es /lineal/ meramente por ser composicion de procedimientos lineales ya vistos en clase y bucles simples.
+* 
