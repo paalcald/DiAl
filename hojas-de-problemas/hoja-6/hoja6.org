@@ -205,4 +205,151 @@ ffun
 #+end_src
 
 En este caso concluimos que el orden es /lineal/ meramente por ser composicion de procedimientos lineales ya vistos en clase y bucles simples.
-* 
+
+Posible mejora: Una vez obtenida la mediana podriamos usar un monticulo de máximos de tamaño k, en el que iriamos insertando los elementos de V en sucesión, teniendo en cuenta que cuando no quepan más, extraeriamos el máximo \Theta(log k) y colocariamos el nuevo valor O(log k), dependiendo de la dimensión de k respecto a n podría ser una mejora.
+
+* Mediana Ponderada.
+
+Se tiene un vector V[1..n] de números enteros distintos, con pesos asociados p_1, ..., p_n. Los pesos son valores no negativos y verifican que \sum_{i=1}^n p_i = 1. Se define la /mediana ponderada/ de /V/ como aquella componente /V[m]/ con 1 \le m \le n que satisface simultáneamente las siguientes dos condiciones:
+
+ 
+$(\sum i : V[i] < V[m] : p_i) < \frac{1}{2}$ y $(\sum i : V[i] \le V[m] : p_i ) \ge \frac{1}{2}\)$
+
+Por ejemplo, para /n/ = 5, /V/ = [4, 2, 9, 3, 7] y P = [0.15, 0.2, 0.3, 0.1, 0.25] con \sum_{i=1}^5 p_i = 1, la media ponderada es /V/[5] = 7, porque (\sum i : V[i] < 7 : p_i) = p_1 + p_2 + p_4 = 0.15 + 0.2 + 0.1 = 0.45 < $\frac{1}{2}$ y (\sum i : V[i]  \le 7 : p_i) = p_1 + p_2 + p_4 + p_5 = 0.7 \ge $\frac{1}{2}$.
+** Diseña un algoritmo de tipo *Divide y Vencerás* que encuentre la mediana ponderada en un tiempo lineal en media (observa que /V/ puede no estar ordenado).
+Para encontrar la mediana primero tomamos un elemento y comprobamos si es la mediana, en caso de no serlo tendremos tres razones:
+
+- No cumple las condiciones por defecto, en este caso sabemos que tendremos que probar con un número mayor.
+  
+- La primera suma excede 1/2, en este caso sabemos que tendremos que probar con un número mayor.
+
+Si ordenamos los elementos de manera que dejamos todos los mayores a la derecha y los menores a la izquierda, escoger nuestro siguiente candidato será \Theta(1). Y esta ordenación será O(n).
+
+#+begin_src pseudo
+fun mediana_ponderada(V[1..n] de ent, P[1..N] de real) dev m: ent
+    var I[1..N] de ent;
+    var i: ent = 0;
+    mientras i < N hacer
+        I[i] := i;
+	    i := i + 1
+	fmientras
+    m := mediana_ponderada_rec(V, P, 0, n - 1)
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun mediana_ponderada(V[1..N] de ent, P[1..N] de real, E / S I[1..N] de ent , c: ent, f: ent) dev r: ent
+    var i := 0;
+    var j := f - 1;
+    var p := 0;
+    m := aleatorio(1,N) - 1;
+    mientras i < f hacer {O(n)}
+        casos
+		V[I[i]] < V[I[m]] ==> i := i + 1; p := p + P[i]
+	      caso V[I[i]] = V[I[m]] ==> si m != f entonces
+                                    < I[m], I[m + 1] > := < I[m + 1], I[m] >;
+ 				        m := m + 1
+				    sino nada
+	      caso V[I[i]] > V[I[m]] ==> < I[i], I[j] > := < I[j], I[i] >; j := j - 1
+	    fcasos
+	fmientras
+	casos
+	    p < .5 && p + P[m] >= .5 ==> r := m
+	    p < .5 ==> mediana_ponderada(V, P, I, m + 1, n - 1)
+	    p > .5 ==> mediana_ponderada(V, P, I, 0, m - 1)
+	fcasos
+ffun
+#+end_src
+
+\begin{align*}
+  T_m(n) &= \frac{1}{n} \sum_{i = 1}^{n} \left( T_{m}(n - i) + n \right) \\
+         &= \frac{1}{n} \left( \sum_{i = 1}^{n} T_{m}(n - i) + \sum_{i = 1}^{n} n \right) \\
+         &= \frac{1}{n} \left( \sum_{i = 1}^{n} T_{m}(n - i) + \frac{n(n - 1)}{2} \right) \\
+  nT_m(n)&= n(n-1) + \left( \sum_{i = 0}^{n - 1} T_{m}(i) \right) \\
+\end{align*}
+
+Lo que es una recurrencia con historia, que resolveremos restando el término T_m(n) y el T_m(n - 1).
+\begin{align*}
+  nT_m(n) &= n(n-1) + \left( \sum_{i = 0}^{n - 1} T_{m}(i) \right) \\
+    nT_m(n) &= n(n-1) + T_m(n - 1) + \left( \sum_{i = 0}^{n - 2} T_{m}(i) \right) \\
+  (n - 1)T_m(n - 1) &= (n - 1)(n - 2) + \left( \sum_{i = 0}^{n - 2} T_{m}(i) \right) \\
+\end{align*}
+Que restando queda
+
+\begin{align*}
+  nT_m(n) - (n - 1)T_m(n - 1) &= n(n-1) + T_m(n - 1) - (n - 1)(n - 2) \\
+  nT_m(n)  &= n(n - 1) + nT_m(n - 1) - (n - 1)(n - 2) \\
+  nT_m(n)  &= (n - n + 2)(n - 1) + nT_m(n - 1) \\
+  nT_m(n)  &= 2(n - 1) + nT_m(n - 1) \\
+  T_m(n)  &= \frac{2(n - 1)}{n} + T_m(n - 1) \\
+  T_m(n)  &= 2 - \frac{2}{n} + T_m(n - 1) \\
+\end{align*}
+
+Que finalmente podemos observar que tiene orden \Theta(n)
+
+
+Sin embargo esta ordenación podría ser muy ineficiente si empezamos por un valor extremo y al escoger nuestro siguiente candidato damos con justo el valor siguiente.
+
+** ¿Como se puede conseguir un coste lineal en tiempo en el caso peor?
+Tendríamos que conseguir una aproximación al valor que pudiesemos calcular en tiempo /lineal/, modificar el algoritmo de las medianas sería una opción, pero ahora no se me ocurre.
+
+* Subsecuencia de suma máxima. Dados /n/ números enteros cualesquiera a_1, a_2, ..., a_n, queremos calcular el valor de la expresión \(\max_{1 \le i \le j \le n} \left(\sum_{k = i}^{j} a_k\right) \) que calcule el máximo de las sumas parciales de elementos consecutivos. Por ejemplo, dados 6 números enteros [-2, 11, -4, 13, -5, -2], la solución al problema es 20 (suma de a_2 hasta a_4). Deseamos implementar un algoritmo *Divide y Vencerás* de complejidad O(n log n) que resuelva el problema.
+
+Como estamos en *divide y vencerás* y se pide orden n log n tendremos que dividir la lista, tomamos la mitad por que ya hemos visto lo mal que sale hacer tercios y que no mejora el orden.
+
+Una vez dividida la lista $A = A_{1} ++ A_{2}$ tendremos tres posibilidades para este máximo:
+
+- Que la suma máxima esté contenida en su totalidad en A_1.
+- Que la suma máxima esté contenida en su totalidad en A_2.
+- Que la suma máxima contenga elementos de ambos conjuntos, A_1 y A_2.
+
+Los dos primeros casos son una llamada recursiva sin más, nos centraremos en el caso restante, que contenga elementos de ambos conjuntos, para que contenga elementos de A_1 = [a_1^1, a_1^2, ..., a_1^n] tiene que contener al menos al último elemento a_1^n y puede contener tantos como A_1 tenga, es decir, tenemos que calcular $(\max i : 1 \le i \le n : (\sum j : i \le j \le n : A_{1}[j]))$ que sabemos será coste lineal.
+
+Análogamente para A_2 tenemos que calcular $(\max i : 1 \le i \le n : (\sum j : 1 \le j \le i : A_{1}[j]))$ que también será coste lineal.
+
+Que nos dejará con una recurrencia de la forma $T(n) = 2T(n / 2) + k_{1} n + k_{2}$ que sabemos desembocará en \Theta(n log n), nos sirve así que escribiremos su pseudocódigo a continuación
+
+#+begin_src pseudo
+fun segmento_suma_maxima(A[1..N] de ent) dev m: ent
+    m = segmento_suma_maxima_parcial(A[1..N], 0, N - 1)
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun segmento_suma_maxima_parcial(A[0..N) de ent, c: nat, f: nat) dev m: ent
+    var n: ent = f + 1 - c
+    m1 := segmento_suma_maxima_parcial(A, c, n / 2)
+    m2 := segmento_suma_maxima_parcial(A, n / 2 + 1, f)
+    m3 := maximo_suma_parcial_hasta(A, c, n / 2)
+    m4 := maximo_suma_parcial_desde(A, n / 2 + 1, f)
+    m := max(m1, m2, m3 + m4)
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun maximo_suma_parcial_hasta(A[0..N) de ent) dev m: ent
+    var i: nat = N - 1;
+    acc := 0;
+    mientras i > 0 hacer
+        acc := acc + A[i];
+        m := max(m, acc);
+	  i := i - 1
+    fmientras 
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun maximo_suma_parcial_desde(A[0..N) de ent) dev m: ent
+    var i: nat = 0;
+    acc := 0;
+    mientras i < N hacer
+        acc := acc + A[i];
+        m := max(m, acc);
+	  i := i + 1
+    fmientras 
+ffun
+#+end_src
+
+* Ejercicio 6
+Es el mismo ejercicio pero con molinos en lugar de listas.
+
