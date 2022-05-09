@@ -327,10 +327,11 @@ ffun
 #+end_src
 
 #+begin_src pseudo
-fun maximo_suma_parcial_hasta(A[0..N) de ent) dev m: ent
-    var i: nat = N - 1;
+fun maximo_suma_parcial_hasta(A[0..N) de ent, c: nat, f: nat) dev m: ent
+    var i: nat = f;
     acc := 0;
-    mientras i > 0 hacer
+    m := A[i];
+    mientras i >= c hacer
         acc := acc + A[i];
         m := max(m, acc);
 	  i := i - 1
@@ -339,10 +340,11 @@ ffun
 #+end_src
 
 #+begin_src pseudo
-fun maximo_suma_parcial_desde(A[0..N) de ent) dev m: ent
-    var i: nat = 0;
+fun maximo_suma_parcial_desde(A[0..N) de ent, c: nat, f: nat) dev m: ent
+    var i: nat = c;
     acc := 0;
-    mientras i < N hacer
+    m := A[i];
+    mientras i <= f hacer
         acc := acc + A[i];
         m := max(m, acc);
 	  i := i + 1
@@ -353,3 +355,54 @@ ffun
 * Ejercicio 6
 Es el mismo ejercicio pero con molinos en lugar de listas.
 
+#+begin_src pseudo
+fun segmento_suma_maxima(A[1..N] de ent) dev m: ent
+    m = segmento_suma_maxima_parcial(A[1..N], 0, N - 1)
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun segmento_suma_maxima_parcial(A[0..N) de ent, c: nat, f: nat)
+    dev < m: ent, first: nat, last: nat >
+    var n: ent = f + 1 - c
+    casos
+        n = 1 ==> < m, first, last > := < A[c], c, c >
+	caso n > 1 ==> < m1, first1, last1 > := segmento_suma_maxima_parcial(A, c, n / 2)
+                < m2, first2, last2 > := segmento_suma_maxima_parcial(A, n / 2 + 1, f)
+                <m31, first3 > := maximo_suma_parcial_hasta(A, c, n / 2)
+                <m32, last3 > := maximo_suma_parcial_desde(A, n / 2 + 1, f)
+		  < m3, first3, last3 > := < m31 + m32, first3, last3>
+                casos
+		      m1 > m2 && m1 > m3 ==> < m, first, last > := < m1, first1, last1 >
+		    caso m2 > m1 && m2 > m3 ==> < m, first, last > := < m2, first2, last2 >
+		    caso m3 > m1 && m3 > m2 ==> < m, first, last > := < m3, first3, last3 >
+		  fcasos
+    fcasos
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun maximo_suma_parcial_hasta(A[0..N) de ent, c: nat, f: nat) dev < m: ent, first: nat >
+    var i: nat = f;
+    acc := 0;
+    m := A[i];
+    mientras i >= c hacer
+        acc := acc + A[i];
+	  si m < acc entonces m := acc; first := i;
+	  i := i - 1
+    fmientras 
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun maximo_suma_parcial_desde(A[0..N) de ent) dev < m: ent, last: nat >
+    var i: nat = c;
+    m := A[i];
+    acc := 0;
+    mientras i <= f hacer
+        acc := acc + A[i];
+	  si m < acc entonces m := acc; last := i;
+	  i := i + 1
+    fmientras 
+ffun
+#+end_src
