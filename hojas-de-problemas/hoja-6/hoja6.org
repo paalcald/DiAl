@@ -221,7 +221,7 @@ Para encontrar la mediana primero tomamos un elemento y comprobamos si es la med
 
 - No cumple las condiciones por defecto, en este caso sabemos que tendremos que probar con un número mayor.
   
-- La primera suma excede 1/2, en este caso sabemos que tendremos que probar con un número mayor.
+- La primera suma excede 1/2, en este caso sabemos que tendremos que probar con un número menor.
 
 Si ordenamos los elementos de manera que dejamos todos los mayores a la derecha y los menores a la izquierda, escoger nuestro siguiente candidato será \Theta(1). Y esta ordenación será O(n).
 
@@ -291,7 +291,7 @@ Que finalmente podemos observar que tiene orden \Theta(n)
 Sin embargo esta ordenación podría ser muy ineficiente si empezamos por un valor extremo y al escoger nuestro siguiente candidato damos con justo el valor siguiente.
 
 ** ¿Como se puede conseguir un coste lineal en tiempo en el caso peor?
-Tendríamos que conseguir una aproximación al valor que pudiesemos calcular en tiempo /lineal/, modificar el algoritmo de las medianas sería una opción, pero ahora no se me ocurre.
+Tendríamos que conseguir una aproximación al valor que pudiesemos calcular en tiempo /lineal/, utilizar el algoritmo /mediana de las medianas/ sería una opción, pero ahora no se me ocurre como demostraría que eso reduce el coste a /lineal/ al no tener en cuenta los pesos.
 
 * Subsecuencia de suma máxima. Dados /n/ números enteros cualesquiera a_1, a_2, ..., a_n, queremos calcular el valor de la expresión \(\max_{1 \le i \le j \le n} \left(\sum_{k = i}^{j} a_k\right) \) que calcule el máximo de las sumas parciales de elementos consecutivos. Por ejemplo, dados 6 números enteros [-2, 11, -4, 13, -5, -2], la solución al problema es 20 (suma de a_2 hasta a_4). Deseamos implementar un algoritmo *Divide y Vencerás* de complejidad O(n log n) que resuelva el problema.
 
