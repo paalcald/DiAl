@@ -245,7 +245,7 @@ fun mediana_ponderada(V[1..N] de ent, P[1..N] de real, E / S I[1..N] de ent , c:
     m := aleatorio(1,N) - 1;
     mientras i < f hacer {O(n)}
         casos
-		V[I[i]] < V[I[m]] ==> i := i + 1; p := p + P[i]
+		V[I[i]] < V[I[m]] ==> p := p + P[I[i]]; i := i + 1
 	      caso V[I[i]] = V[I[m]] ==> si m != f entonces
                                     < I[m], I[m + 1] > := < I[m + 1], I[m] >;
  				        m := m + 1
@@ -254,7 +254,7 @@ fun mediana_ponderada(V[1..N] de ent, P[1..N] de real, E / S I[1..N] de ent , c:
 	    fcasos
 	fmientras
 	casos
-	    p < .5 && p + P[m] >= .5 ==> r := m
+	    p < .5 && p + P[I[m]] >= .5 ==> r := m
 	    p < .5 ==> mediana_ponderada(V, P, I, m + 1, n - 1)
 	    p > .5 ==> mediana_ponderada(V, P, I, 0, m - 1)
 	fcasos
@@ -286,7 +286,6 @@ Que restando queda
 \end{align*}
 
 Que finalmente podemos observar que tiene orden \Theta(n)
-
 
 Sin embargo esta ordenación podría ser muy ineficiente si empezamos por un valor extremo y al escoger nuestro siguiente candidato damos con justo el valor siguiente.
 
