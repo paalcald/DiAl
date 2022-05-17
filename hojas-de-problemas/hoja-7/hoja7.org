@@ -1,0 +1,62 @@
+#+Title: Hoja 7: Algoritmos Voraces
+#+Author: Pablo C. Alcalde
+* Ejercicio 1
+* Ejercicio 2
+* Un camionero conduce desde Bilbao a Málaga siguiendo una ruta dada y llevando un camión que le permite, con el tanque de gasolina lleno, recorrer /n/ kilómetros sin parar. El camionero dispone de un mapa de carreteras que le indica las distancias entre las gasolineras que hay en su ruta. Como va con prisa, el camionero desea parar a repostar el menor número de veces posible. Diseña un *algoritmo voraz* para determinar en qué gasolineras tiene que parar y demostrar que el algoritmo encuentra siempre la solución optima.
+
+Suponiendo que partimos siendo capaces de realizar /d0/ kilómetros y que se nos dan los datos de la siguiente manera.
+
+[[file:camineros.png]]
+
+El problema consiste en minimizar el número de paradas $\sum_{i = 1}^{N} P[i]$ 
+
+Tomaremos la estrategía voraz consistente en, en cada tramo recorrer la mayor distancia posible.
+
+#+begin_src pseudo
+fun hoja_de_ruta(D[1..N] de real+, d0: real+, n: real+) dev P[1..N] de bool
+    var d: real+ := d0;
+    para i desde 1 hasta N hacer
+        si d + D[i] < n entonces
+	      P[i] := 0;
+	      d := d + D[i]
+	  sino
+	      P[i] := 1;
+	      d := D[i]
+	  fsi
+    fpara
+ffun
+#+end_src
+
+Para la demostración consideraremos nuestra solución \( X = \sum_{i = 1}^{N} P[i] \) y la compararemos con la solución óptima \( X\prime = \sum_{i = 1}^{N} P\prime[i] \) y demostraremos que son la misma. Para ello tendremos que utilizar una inducción basada en su estructura. Tomando de hipotesis de inducción que \( \forall j < N \sum_{i = 1}^{j} P[i] = \sum_{i = 1}^{j} P\prime[i] \) demostraremos que de no ser \( P[j+1] = P\prime[j+1] la solución óptima sería mejorable, barajaremos los siguientes casos.
+
+- $P[j + 1] = 1 \land P\prime[j + 1] = 0$
+  Nuestra solución para en la gasolinera j+1-ésima, mientras que la solución óptima no. Pero nuestra solución realiza el en cada paso el máximo de kilómetros antes de parar y nuestra hipótesis es que eran iguales hasta esa gasolinera. De darse este caso, en la óptima, el camión no llegaría a la siguiente gasolinera.
+- $P[j + 1] = 0 \land P\prime[j + 1] = 1$
+  Nuestra solución no para en la gasolinera j+1-ésima mientras que la óptima para. Pero como nuetra solución realiza en cada paso el número maximo de kilómetros antes de parar, eso significaría que podríamos alcanzar la siguiente gasolinera, y aún asi nos hemos parado antes, por lo que, la distancia máxima que podemos alcanzar se habrá reducido con esa parada, lo que no nos puede llevar a un óptimo, en el mejor de los casos a un caso equivalente.
+
+Esto nos deja con la única posibilidad de que nuestra solución y la óptima sean iguales.
+* Ejercicio 4
+
+* Tenemos una serie de procesos a ejecutar en un ordenador, que ejecuta los procesos en orden secuencial. Queremos minimizar el tiempo total que los procesos permanecen en el sistema: la suma de los tiempos de espera más los tiempos de ejecución. Suponemos que los tiempos que va a tardar la ejecución de cada uno de los procesos son conocidos. Diseña un *algoritmo voraz* que determine en qué orden ejecutar los procesos y demostrar que es óptima.
+
+Queremos minimizar \(\sum_{i = 1}^N\left(\left(\sum_{j = 1}^{i - 1} T[j]\right) + T[i] \right) = \sum_{i = 1}^N(N - i + 1)T[i]\) así que tomaremos un algoritmo voraz que tome los procesos que se ejecuten en menor tiempo antes.
+
+#+begin_src pseudo
+fun procesos(T[1..N] de real+) dev P[1..N] de nat
+    para i desde 1 hasta N hacer
+    	 P[i] := i
+    fpara
+    mergesort_indices(T, I);
+ffun
+#+end_src
+
+Comparemos nuestra solución con la óptima, sabemos que esta será una permutación de los valores de la nuestra, y toda permutación se puede componer a base de un número finito de intercambios.
+
+Demostraremos que cualquier intercambio de nuestro orden desemboca en un tiempo de ejecución mayor.
+
+Supongamos que $X\prime$ difiere por un intercambio de $X$, es decir, $\forall k \not\in {i, j} T\prime[k] = T[k] \land T\prime[i] = T[j] \land X\prime[j] = X[i]$. Es decir, $X - X\prime = (N - i + 1) (T[i] - T\prime[i]) + (N - j + 1) (T[j] - T\prime[j]) = (N - i + 1) (T[i] - T[j]) + (N - j + 1) (T[j] - T[i])$ $ = ((N - i + 1) - (N - j + 1)) (T[i] - T[j]) = (j - i)(T[j] - T[i])$. Pero por construcción $\forall i, j|  i < j \implies T[i] < T[j]$ por lo que esta cantidad es negativa.
+
+Concluimos que cualquier permutación de nuestra solución desemboca en un incremento del tiempo.
+
+* Ejercicio 6
+
