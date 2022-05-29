@@ -1,6 +1,60 @@
 #+Title: Hoja 7: Algoritmos Voraces
 #+Author: Pablo C. Alcalde
-* Ejercicio 1
+* En un legano país los estudios de neuromagnetismo capilar están organizados de la siguiente manera: existen /N/ asignaturas y cada asignatura proporciona una cualificación y un título, es decir, no es necesario aprobar todas las asignaturas. La relación entre las asignaturas es la siguiente: para dos asignaturas, A y B, puede existir una relación de suficiencia de A hacia B si para matricularse en B es suficiente haber aprobado A; o bien, pueden ser independientes: el aprobar A no da derecho a matricularse en B. Son conocidas las relaciones de suficiencia entre las asignaturas. Diseña un *algoritmo voraz* que determine el mínimo número de años necesario para aprobar una asignatura dada, detallando las estructuras de datos necesarias para presentar la información, así como la función o procedimiento que implemente este algoritmo.
+
+Para resolver el problema tomaremos las relaciones de suficiencia como un grafo dirigido, por lo que empezaremos cálculando el número de años necesarios para llegar a la asignatura dada desde cada uno de sus requisitos, para esto aplicaremos el algorítmo de Dijkstra de caminos mínimos, tomando el grafo $G_{i,j} = t_{i,j}$ si j es requisito suficiente de i y se tarda t_{j} semestres en cursar j ó $G_{i,j} = 0 $ si no.
+
+#+begin_src pseudo
+fun dijkstra(G[1..N, 1..N] de bool, o: ent) dev <T[1..N] de nat, b: bool>
+    var C: conjunto;
+    var m: ent;
+    var n: nat;
+    para i desde 1 hasta N hacer
+        si i != o entonces C.añadir(i) sino nada fsi;
+	  si G[o,i] entonces T[i] = G[o,i] sino T[i] = -1 fsi;
+    fpara
+    para k desde 1 hasta N - 2 hacer
+        m := -1; {El camino no esta conectado}
+	  para i desde 1 hasta C.tamaño() hacer
+	      m := T[C[i]]
+	      si m != -1 && T[C[i]] < m entonces {si tengo alguna conexión y encuentro una menor, la tomo}
+	          m := T[C[i]];
+		  n := C[i];
+	      sino si m = -1 && T[C[i]] != -1 entonces m := T[C[i]]; n := C[i] sino nada fsi;
+	      {si encuentro alguna conexión la tomo}
+	      fsi
+	  fpara;
+	  si m := -1 entonces b := falso; terminar sino C.quitar(n);
+	  para i desde 1 hasta C.tamaño() hacer
+	      si G[n, C[i]] != falso && T[n] + G[n, C[i]] < T[C[i]] entonces
+	          T[C[i]] := d[n] + G[n, C[i]]
+	      sino nada fsi
+	  fpara
+    fpara
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun min(L[1..N] de bool, A[1..N] de nat) dev a
+    a := a[1];
+    para i desde 2 hasta N hacer
+        si a != -1 && A[i] < a && L[i] entonces a := D[i] fsi
+    fpara
+ffun
+#+end_src
+
+#+begin_src pseudo
+fun tiempo_asignatura(L[1..N] de bool, G[1..N, 1..N] de ent, o: ent) dev t: nat
+    var T[1..N] de ent;
+    var b: bool;
+    < T, b > := dijkstra(G, o);
+    si b entonces
+        t := min(L, T) + 1;
+    sino t := -1 fsi;
+#+end_src
+
+Donde una vez tenemos la distancia mínima de la asignatura a cada nodo, comprobamos que la asignatura sea libre y tomamos el mínimo de estos.
+
 * Ejercicio 2
 * Un camionero conduce desde Bilbao a Málaga siguiendo una ruta dada y llevando un camión que le permite, con el tanque de gasolina lleno, recorrer /n/ kilómetros sin parar. El camionero dispone de un mapa de carreteras que le indica las distancias entre las gasolineras que hay en su ruta. Como va con prisa, el camionero desea parar a repostar el menor número de veces posible. Diseña un *algoritmo voraz* para determinar en qué gasolineras tiene que parar y demostrar que el algoritmo encuentra siempre la solución optima.
 

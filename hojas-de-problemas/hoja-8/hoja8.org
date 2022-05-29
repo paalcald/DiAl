@@ -1,0 +1,254 @@
+#+Title: Hoja 8: Algoritmos Dinámicos
+#+Author: Pablo C. Alcalde
+#+LaTeX_HEADER: \DeclareMathOperator{\monedas}{monedas} \DeclareMathOperator{\excal}{excal} \DeclareMathOperator{\calorias}{calorias} \DeclareMathOperator{\devolucion}{devolucion}
+* Dada una cantidad de dinero /C/, deseamos encontrar el mínimo número de monedas que cubra exactamente, si es posible, esta cantidad. Para ello, conocemos los valores de los /N/ tipos de monedas y el número de monedas disponibles de cada tipo. Diseña un *algoritmo dinámico* que resuelva el problema.
+
+$\monedas(N, C) =$ número de monedas mínimo escogidas de los /N/ tipos de monedas disponible con los que pagar la cantidad /C/.
+
+$\monedas(i, j) =$ número de monedas mínimo escogidas de entre los /i/ primeros tipos de monedas disponibles con los que pagar la cantidad /j/.
+
+\begin{equation*}
+  \monedas(i,j) =
+  \begin{cases}
+       0, &\text{si j = 0}   \\
+       \infty, &\text{si i = 0} \\
+    \min_{0 \le k \le \min(c_i,j \;\mathbin{div}\; c_{i})}\monedas(i - 1, j - kc_{i}) + k, &\text{en caso contrario} \\
+  \end{cases}
+\end{equation*}
+
+La cuál explicamos de la siguiente manera:
+- $\monedas(i, 0) = 0$ Si llamamos a la función con $j = 0$, significará que hemos llegado aquí aceptando la moneda i + 1, con la que alcanzamos exáctamente la cuantía necesaría.
+- $\monedas(0, j) = \infty$ Si llamamos la función con $i = 0$, sin ser $j = 0$, significará que ya no nos quedan monedas, pero aún no alcanzamos el importe. Es decir, hay que descartar esta rama. Como hacemos la selección con un $\min$ asignaremos el valor $\infty$.
+- \(\monedas(i, j) = \min_{0 \le k \le \min(c_i,j \;\mathbin{div}\; c_{i})}\monedas(i - 1, j - kc_{i}) + k\) En cualquier otro caso, probamos con cada posible número de monedas del valor i-ésimo y buscamos cual nos da un menor número de monedas.
+
+Almacenaremos los datos y construiremos una tabla $\Theta(N*C)$ que, necesitaremos mantener al completo si queremos obtener posteriormente las monedas. Pero podemos tomar sólo un array $\Theta(C)$ si sólo nos interesase el número de monedas, en este caso, deberíamos recorrer de derecha a izquierda, puesto que, en caso contrarío, escribiríamos encima de valores que necesitaremos para los siguientes cálculos.
+
+El coste en tiempo será $\Theta(N*C*\sum_{i = 1}^{N} cantidades[i])$.
+
+#+begin_src pseudo
+fun monedas(cantidades [1..N] de ent, valores[1..N] de ent, C: ent) dev < cuantas[1..N] de nat, n: ent >
+    var tabla[0..N][0..C] de ent;
+    var minimo: ent;
+    {Caso j = 0}
+    para i en 0 ..N hacer
+        tabla[i][0] := 0;
+    fpara
+    {Caso i = 0 con j != 0}
+    para j en 1 .. C hacer
+        tabla[0][j] := inf;
+    fpara
+    {Resto de Casos}
+    para i en 1 .. N hacer
+        para j en 1 .. N hacer
+	      minimo := tabla[i - 1][j];
+	      para k en 1 .. min(cantidades[i], j div valores[i]) hacer
+	          minimo := min(minimo, tabla[i - 1][j - k * valores[i]] + k);
+	      fpara;
+	      tabla[i][j] = minimo
+	  fpara    
+    fpara
+    n := tabla[N][C];
+    {inicializamos cuantas[1..N]}
+    para i en 1 .. N hacer
+        cuantas[i] = 0
+    fpara
+    var i := N;
+    var c := C;
+    mientras i >= 1
+        {comprobamos si quedan monedas usadas por encontrar}
+        si c = 0 entonces break
+	  {en caso contrario exploramos esa fila de la tabla}
+	  sino
+            para k en 0 .. min(cantidades[i], j div valores[i]) hacer
+                si tabla[i,c] = tabla[i - 1, c - k * valores[i] entonces
+		  {de usarse esa moneda marcamos el número}
+	              cuantas[i] := k;
+                    i := i - 1;
+                    c := c - k * valores[i];
+		      break;
+	          fsi
+		  {de no usarse esa moneda, continuamos}
+		  i := i - 1;
+	      fpara
+	  fsi
+	  {de no usarse una moneda se queda el valor en 0, así que no hay que hacer más}
+    fmientras
+ffun
+#+end_src
+
+
+* TODO Un estudiente quiere impresionar a su madre. Ha decidido gastarse todo su dinero en flores. Según los criterios estéticos, el ramo ideal es aquel que minimiza el número de flores. Dado el prestigio de la floristería piensa que para cada tipo de flor pueden vender un número infinito de copias. Ante la cada de asombro de su madre, el estudiante recapacita; quizás no fué correcta su suposición. Diseña dos *algoritmos dinámicos*, uno que resuelva el problema suponiendo un número infinito de copias, y otro suponiendo un número finito de copias.
+
+* Un excéntrico nutricionista va a un restaurante. En la carta aparecen todos los platos disponibles con el número de calorias. El nutricionista conoce el número mínimo de calorías que su cuerpo necesita en esa comida. Su objetico es encontrar el menú que cubra exactamente esa cantidad de calorías o las supere de forma mínima. Además, no quiere repetir platos. Diseña un *algoritmo dinámico˛que determine que platos forman parte del menú óptimo y el número de calorías del menú óptimo.
+
+Para diseñar el algoritmo usaremos la siguiente función que nos facilitará las calorias por las que nos pasamos con cada menú.
+
+$\excal(N, C) =$ número de calorías mínimo por el que me paso del mínimo calorico deseado /C/ comiendo de entre los /N/ platos del restaurante.
+
+$\excal(i, j) =$ número de calorias mínimo por el que me paso del mínimo calórico /j/ escogiendo de entre los /i/ primeros platos.
+
+\begin{equation*}
+  \excal(i, j) =
+  \begin{cases}
+    0, &\text{si j = 0} \\
+    \infty, &\text{si i = 0} \\
+    \min(\excal( - 1, j), \excal(i - 1, j - \calorias[i])),  &\text{si } \calorias[i] \le j \\
+    \min(\excal(i - 1, j), \calorias[i] - j), &\text{en caso contrario} \\
+  \end{cases}
+\end{equation*}
+
+La cuál explicamos de la siguiente manera, saltandonos los casos iguales al ejercicio 1.
+- Si $\calorias[i] < j$ podemos comernos el plato i-ésimo, dejando $j - \calorias[i]$ calorias por consumir o no comerlo dejando $j$.
+- Si el aporte calórico del plato excede las calorias restantes /j/ entonces guardamos en nuestra función por cuanto nos hemos pasado, para al tomar el mínimo escoger el menor valor por exceso.
+
+A la hora de implementar el algoritmo, tendrémos que almacernar una tabla $\Theta(N*C)$ en memoria si queremos encontrar el menú óptimo, si por otro lado sólo nos interesase el número de calorias del menú optimo, valdría con guardar un array $\Theta(C)$, que tendríamos que recorrer de derecha a izquierda para no reescribir valores que tendrémos que usar posteriormente.
+
+En ambos casos el coste en tiempo será $\Theta(N*C)$
+
+#+begin_src pseudo
+fun excal(calorias[1..N] de ent, C: ent) dev < cuales[1..N] de bool, n: ent >
+    var tabla[0..N][0..C] de ent;
+    {Caso j = 0}
+    para i en 0 ..N hacer
+        tabla[i][0] := 0;
+    fpara
+    {Caso i = 0 con j != 0}
+    para j en 1 .. C hacer
+        tabla[0][j] := inf;
+    fpara
+    {Resto de Casos}
+    para i en 1 .. N hacer
+        para j en 1 .. N hacer
+	      si j - calorias[i] >= 0 entonces
+                tabla[i][j] := min(tabla[i - 1][j], tabla[i - 1][j - calorias[i]]);
+	      sino
+	          tabla[i][j] := min(tabla[i - 1][j], calorias[i] - j);
+	      fsi
+	  fpara    
+    fpara
+    n := C + tabla[N, C];
+    {inicializamos cuales[1..N]}
+    para i en 1 .. N hacer
+        cuales[i] = falso;
+    fpara
+    var i := N;
+    var c := C;
+    mientras i >= 1
+        si calorias[i] <= c entonces
+	      si tabla[i][c] = tabla[i - 1][c - calorias[i]];
+                cuales[i] := cierto;
+                c := c - calorias[i];
+	      fsi
+	  sino calorias[i] > j entonces
+	      si tabla[i][c] = calorias[i] - j;
+	          cuales[i] := cierto;
+		  break;
+            fsi
+	  fsi
+	  i := i - 1;
+    fmientras
+ffun
+#+end_src
+
+* TODO Supongamos que existen /n/ bancos en los que podemos invertir, y disponemos de una cantidad /C/ para invertirla. Cada banco nos proporciona intereses según una función monótona creciente $f_{i}(x)$, donde /x/ es el importe a invertir e /i/ el banco en el que se invierte. Diseña un *algoritmo dinámico que encuentre la inversión óptima, es decir, la cantidad que se debe invertir en cada banco para maximizar los intereses obtenidos.
+* A un estudiante le han hecho un regalo. Como no le gusta ha decidido cambiarlo por otros productos. Su cambio ideal es el siguiente: el valor de los productos tiene que ser igual al valor del regalo o superarlo de forma mínima. No le importa tener varias copias del mismo producto. Suponiendo conocidos los productos de la tienda, sus precios y el número de unidades de cada producto, diseña un *algoritmo dinámico* que determine el valor de los productos elegidos en el canje.
+
+Vamos a usar las ideas del ejercicio 3 pero adaptarlas para una situación similar a la del ejercicio 1, usaremos una estructura de datos auxiliar
+
+$ParExcesoNumero(exceso: ent, numero: ent)$, que implementa la funcion min de la siguiente manera
+
+#+begin_src pseudo
+fun min(a:ParExcesoNumero, b: ParExcesoNumero) dev c: ParExcesoNumero
+    casos
+        a.exceso < b.exceso ==> c := a
+	caso a.exceso > b.exceso ==> c := b
+	caso a.exceso = b.exceso ==> si a.numero > b.numero entonces c := a
+	                        sino c := b fsi
+    fcasos
+ffun
+#+end_src
+
+$devolucion(N, C) =$ el exceso mínimo con el que podemos devolver el regalo maximizando el número /p/ de unidades a obtener de entre los /N/ productos disponibles en tienda siendo el precio a devolver /C/.
+
+$devolucion(i, j) =$ el exceso mínimo con el que podemos devolver el regalo maximizando el número /p/ de unidades a obtener de entre los /i/ primeros productos disponibles en tienda siendo el precio restante a devolver /j/.
+
+\begin{equation*}
+  \devolucion(i,j) =
+  \begin{cases}
+       [0, 1] &\text{si j = 0}   \\
+       [\infty, -\infty], &\text{si i = 0} \\
+    \min\left\big\{[(j \;\mathbin{div}\; c_{i} + 1 )*c_i - j, (j \;\mathbin{div}\; c_{i} + 1 )],
+ \min_{0 \le k \le \min(c_i,j \;\mathbin{div}\; c_{i})}\devolucion(i - 1, j - kc_{i}) + [0, k]\left\big\}, &\text{en caso contrario} \\
+  \end{cases}
+\end{equation*}
+
+Que se explica análogo al ejercicio 1 pero teniendo en cuenta que devolución devuelve un $ParExcesoNumero$ y teniendo en cuenta el caso de que me pase comprando una unidad más de lo que mi presupuesto me permite.
+
+#+begin_src pseudo
+fun devolucion(precios[1..N] de ent, unidades[1..N] de ent, C: ent) dev < cuantos[1..N] de nat, n: ent >
+    var tabla[0..N][0..C] de ParExcesoNumero;
+    var minimo: ParExcesoNumero;
+    {Caso j = 0}
+    para i en 0 ..N hacer
+        tabla[i][0] := ParExcesoNumero(0, 1);
+    fpara
+    {Caso i = 0 con j != 0}
+    para j en 1 .. C hacer
+        tabla[0][j] := ParExcesoNumero(inf, -inf);
+    fpara
+    {Resto de Casos}
+    para i en 1 .. N hacer
+        para j en 1 .. N hacer
+	      minimo := ParExcesoNumero((j div precios[i] + 1) * (precios[i] - j),
+	                               (j div precios[i] + 1));
+	      para k en 0 .. min(unidades[i], j div precios[i]) hacer
+	          minimo := min(minimo, tabla[i - 1][j - k * precios[i]] + k)
+	      fpara
+	      tabla[i][j] := minimo;
+	  fpara    
+    fpara
+    n := tabla[N][C].exceso + C;
+    {inicializamos cuantas[1..N]}
+    para i en 1 .. N hacer
+        cuantos[i] = 0
+    fpara
+    var i := N;
+    var c := C;
+    mientras i >= 1
+        {comprobamos si quedan productos escogidos}
+        si c = 0 entonces break
+	  {en caso contrario exploramos esa fila de la tabla}
+	  sino
+	      {exploramos el caso de que nos gastemos todo el dinero y más en este item}
+	      si tabla[i][c] = ((j div precios[i] + 1) * (precios[i] - j),
+	                        (j div precios[i] + 1))
+	      entonces
+	      {ya no queda dinero y nos hemos pasado de nuestro budget, así que acabamos}
+	          cuantos[i] := (j div precios[i] + 1);
+		  break;
+	      fsi;
+            para k en 0 .. k hacer
+                si tabla[i][c] = tabla[i - 1][c - k * precios[i]] entonces
+		  {de escogerse ese producto marcamos el número y continuamos}
+	              cuantos[i] := k;
+                    i := i - 1;
+                    c := c - k * precios[i];
+		      break;
+	          fsi
+		  {de no escogerse continuamos}
+		  i := i - 1;
+	      fpara
+	  fsi
+	  {de no tomar un producto se queda el valor en 0, así que no hay que hacer más}
+    fmientras
+ffun
+#+end_src
+
+
+El con la introducción de nuestra estructura de datos $ParExcesoNumero$ el código es análogo al 1 (salvo que trabajamos con esta estructura en lugar de enteros en nuestra matrix, es decir, más memoría, aún que no sea de mayor orden).
+Por lo tanto así el coste en tiempo también será el mismo, salvo por la comparación adicional a hacer descrita abajo, que tampoco lo subirá en orden.
+
+Inicializamos $minimo$ al valor de este caso $[(j \;\mathbin{div}\; c_{i} + 1 )*c_i - j, (j \;\mathbin{div}\; c_{i} + 1 )]$ y trabajamos así con todo el rango de k de 0 a N en el para.
+
+Finalmente extraemos los objetos análogamente al ejercicio 1 también.
+
